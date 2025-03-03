@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代运营神器-包子</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom variables */
+        :root {
+            --primary: #5D5CDE;
+        }
+        
+        .dark .preview-content {
+            background-color: #2d2d2d;
+            color: #f3f3f3;
+        }
+        
+        .light .preview-content {
+            background-color: #f9f9f9;
+            color: #333333;
+        }
+        
+        .preview-content {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-y: auto;
+            word-break: break-word;
+        }
+        
+        /* 改善段落显示 */
+        .preview-content p {
+            margin-bottom: 1em;
+            line-height: 1.6;
+        }
+        
+        .preview-content h1, 
+        .preview-content h2, 
+        .preview-content h3, 
+        .preview-content h4, 
+        .preview-content h5, 
+        .preview-content h6 {
+            margin-top: 1.5em;
+            margin-bottom: 0.75em;
+        }
+        
+        .preview-content img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .preview-content pre {
+            padding: 1rem;
+            overflow-x: auto;
+            border-radius: 0.25rem;
+        }
+        
+        .preview-content code {
+            font-family: monospace;
+        }
+        
+        .preview-content table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        .preview-content th, .preview-content td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        
+        .preview-content blockquote {
+            border-left: 4px solid #ccc;
+            padding-left: 1rem;
+            color: #666;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .preview-content blockquote {
+                border-left-color: #555;
+                color: #bbb;
+            }
+            .preview-content th, .preview-content td {
+                border-color: #555;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <!-- 登录界面 -->
+    <div id="login-container" class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-primary">代运营神器-包子 🥟</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">请登录后使用</p>
+            </div>
+            
+            <div class="flex justify-center gap-4 mb-6">
+                <button id="admin-login-tab" class="px-4 py-2 bg-primary text-white rounded-lg">管理员登录</button>
+                <button id="user-login-tab" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg">用户登录</button>
+            </div>
+            
+            <!-- 管理员登录表单 -->
+            <div id="admin-login-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-300 mb-2" for="admin-username">管理员账号</label>
+                    <div class="relative">
+                        <input id="admin-username" type="password" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-base" placeholder="输入管理员账号">
+                        <button type="button" class="toggle-password absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 dark:text-gray-400 focus:outline-none" data-target="admin-username">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 eye-open" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 eye-closed hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-300 mb-2" for="admin-password">管理员密码</label>
+                    <div class="relative">
+                        <input id="admin-password" type="password" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-base" placeholder="输入管理员密码">
+                        <button type="button" class="toggle-password absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 dark:text-gray-400 focus:outline-none" data-target="admin-password">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 eye-open" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 eye-closed hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-4 flex items-center">
+                    <input id="remember-admin" type="checkbox" class="h-4 w-4 text-primary border-gray-300 focus:ring-primary">
+                    <label for="remember-admin" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">记住账号密码</label>
+                </div>
+                <button id="admin-login-btn" class="w-full py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">登录管理员账号</button>
+            </div>
+            
+            <!-- 用户登录表单 -->
+            <div id="user-login-form" class="hidden">
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-300 mb-2" for="card-key">卡密</label>
+                    <div class="relative">
+                        <input id="card-key" type="password" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-base" placeholder="输入卡密">
+                        <button type="button" class="toggle-password absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 dark:text-gray-400 focus:outline-none" data-target="card-key">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 eye-open" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 eye-closed hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-4 flex items-center">
+                    <input id="remember-user" type="checkbox" class="h-4 w-4 text-primary border-gray-300 focus:ring-primary">
+                    <label for="remember-user" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">记住卡密</label>
+                </div>
+                <button id="user-login-btn" class="w-full py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">验证登录</button>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <p class="text-xs text-gray-500 dark:text-gray-400">© 2025 代运营神器-包子</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 管理员卡密管理界面 -->
+    <div id="admin-panel" class="hidden min-h-screen">
+        <div class="container mx-auto px-4 py-8 max-w-5xl">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-primary">卡密管理系统</h1>
+                <div class="flex gap-3">
+                    <button id="enter-app-btn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                        进入应用
+                    </button>
+                    <button id="logout-admin-btn" class="px-4 py-2 bg-gray-500 dark:bg-gray-700 text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                        退出登录
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">生成卡密</h2>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2" for="card-count">数量</label>
+                        <input id="card-count" type="number" min="1" max="100" value="5" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-base">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2" for="card-expiry">有效期(天)</label>
+                        <input id="card-expiry" type="number" min="1" value="30" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 text-base">
+                    </div>
+                    <button id="generate-keys-btn" class="w-full py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">生成卡密</button>
+                </div>
+                
+                <div class="md:col-span-2 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">卡密列表</h2>
+                        <div class="flex gap-2">
+                            <button id="export-keys-btn" class="px-3 py-1 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors text-sm">
+                                导出卡密
+                            </button>
+                            <button id="import-keys-btn" class="px-3 py-1 bg-gray-500 dark:bg-gray-700 text-white rounded-lg hover:bg-opacity-90 transition-colors text-sm">
+                                导入卡密
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white dark:bg-gray-800">
+                            <thead>
+                                <tr class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                    <th class="py-2 px-4 border-b text-left">卡密</th>
+                                    <th class="py-2 px-4 border-b text-left">生成时间</th>
+                                    <th class="py-2 px-4 border-b text-left">过期时间</th>
+                                    <th class="py-2 px-4 border-b text-left">状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keys-table-body">
+                                <tr class="text-gray-700 dark:text-gray-300">
+                                    <td colspan="4" class="py-4 px-4 border-b text-center">暂无卡密数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主应用界面 -->
+    <div id="app-container" class="hidden">
+        <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <h1 class="text-3xl font-bold text-center mb-2 text-primary">代运营神器-包子 🥟</h1>
+        <p class="text-center mb-8 text-gray-600 dark:text-gray-400">快速转换文本格式，轻松处理内容</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div class="flex flex-col h-full md:col-span-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-semibold">输入 (Markdown 或 HTML)</h2>
+                    <div class="flex gap-2">
+                        <button id="import-btn" class="px-3 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors">
+                            导入文件
+                        </button>
+                        <button id="clear-btn" class="px-3 py-1 bg-gray-500 dark:bg-gray-700 text-white rounded hover:bg-opacity-90 transition-colors">
+                            清空
+                        </button>
+                    </div>
+                </div>
+                <!-- 文件名显示区域 -->
+                <div id="current-file-name" class="mb-2 px-1 text-primary font-medium hidden"></div>
+                <textarea id="input-text" class="flex-grow p-4 border dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none text-base" placeholder="在此处输入或粘贴您的 Markdown 或 HTML 内容..."></textarea>
+                <div class="mt-4 flex gap-2">
+                    <button id="to-html-btn" class="px-4 py-2 bg-primary text-white rounded hover:bg-opacity-90 transition-colors">
+                        转换为 HTML
+                    </button>
+                    <button id="to-markdown-btn" class="px-4 py-2 bg-primary text-white rounded hover:bg-opacity-90 transition-colors">
+                        转换为 Markdown
+                    </button>
+                </div>
+                <input type="file" id="file-input" class="hidden" accept=".md,.markdown,.txt,.html">
+            </div>
+            
+            <div class="flex flex-col h-full md:col-span-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-semibold">预览</h2>
+                    <div class="flex gap-2">
+                        <button id="copy-html-btn" class="px-3 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors">
+                            复制 HTML
+                        </button>
+                        <button id="copy-preview-btn" class="px-3 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors">
+                            复制预览内容
+                        </button>
+                    </div>
+                </div>
+                <div class="border dark:border-gray-700 rounded-md flex-grow flex flex-col">
+                    <div class="p-2 border-b dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex flex-wrap md:flex-nowrap justify-between">
+                        <div class="flex gap-2 mb-2 md:mb-0">
+                            <button id="preview-tab" class="px-3 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors">
+                                预览
+                            </button>
+                            <button id="html-tab" class="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-opacity-90 transition-colors">
+                                HTML
+                            </button>
+                            <button id="css-btn" class="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-opacity-90 transition-colors">
+                                自定义CSS
+                            </button>
+                        </div>
+                        <div class="flex-shrink-0 flex items-center whitespace-nowrap">
+                            <span class="text-sm text-gray-600 dark:text-gray-400 mr-2">预览模式：</span>
+                            <div class="flex gap-2">
+                                <button id="pc-preview-btn" class="px-3 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    电脑
+                                </button>
+                                <button id="mobile-preview-btn" class="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-opacity-90 transition-colors text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    手机
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="preview-container" class="flex-grow flex justify-center">
+                        <div id="nice" class="preview-content w-full dark:bg-gray-800 bg-white"></div>
+                        <div id="mobile-container" class="hidden flex-grow flex items-center justify-center py-4">
+                            <div class="shadow-md mx-auto overflow-y-auto border dark:border-gray-700 rounded" style="width: 375px; max-width: 100%; height: auto; max-height: 80vh;">
+                                <div id="nice" class="preview-content bg-white dark:bg-gray-800 mobile-view"></div>
+                            </div>
+                        </div>
+                        <textarea id="html-content" class="hidden p-4 w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-base resize-none" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧CSS编辑区域 - 重新布局为垂直可折叠的设计 -->
+            <div id="css-container" class="flex flex-col h-full md:col-span-2 hidden">
+                <div class="flex flex-col mb-2">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-lg font-semibold flex items-center">
+                            自定义CSS
+                            <button id="toggle-css-editor" class="ml-2 px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-opacity-90 transition-colors text-xs">
+                                <span id="toggle-icon">📕</span>
+                            </button>
+                        </h2>
+                        <div class="flex gap-2">
+                            <button id="apply-css-btn" class="px-3 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors text-sm">
+                                应用CSS
+                            </button>
+                            <button id="save-css-btn" class="px-3 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors text-sm">
+                                保存CSS
+                            </button>
+                            <button id="reset-css-btn" class="px-3 py-1 bg-gray-500 dark:bg-gray-700 text-white rounded hover:bg-opacity-90 transition-colors text-sm">
+                                重置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="css-editor-container" class="flex-grow">
+                    <textarea id="custom-css" class="w-full h-96 p-4 border dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-vertical text-base" placeholder="在此处输入自定义CSS样式..."></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8">
+            <h3 class="text-lg font-semibold mb-2">模板设置</h3>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="border dark:border-gray-700 rounded-md p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-medium text-primary">文章模板样式管理</h4>
+                        <div class="flex gap-2">
+                            <button id="export-all-btn" class="px-3 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors text-sm flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                导出所有设置
+                            </button>
+                            <button id="import-all-btn" class="px-3 py-1 bg-gray-500 dark:bg-gray-700 text-white rounded hover:bg-opacity-90 transition-colors text-sm flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L4 8m4-4v12" />
+                                </svg>
+                                导入设置
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="border dark:border-gray-700 rounded-md p-3">
+                            <div class="mb-2">
+                                <h5 class="font-medium">头部样式 (top)</h5>
+                            </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <button id="upload-top-btn" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-opacity-90 transition-colors text-sm flex-1">上传文件</button>
+                                <input type="file" id="top-file-input" class="hidden" accept=".txt,.md,.html,.template" multiple>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select id="top-template-select" class="px-2 py-1 border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-sm flex-1">
+                                    <option value="">-- 选择模板 --</option>
+                                </select>
+                                <button id="apply-top-btn" class="px-2 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors text-sm">应用</button>
+                            </div>
+                            <div class="mt-2 text-xs text-gray-500 dark:text-gray-400" id="top-file-count">已上传: 0个文件</div>
+                        </div>
+                        
+                        <div class="border dark:border-gray-700 rounded-md p-3">
+                            <div class="mb-2">
+                                <h5 class="font-medium">小标题样式 (h2)</h5>
+                            </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <button id="upload-h2-btn" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-opacity-90 transition-colors text-sm flex-1">上传文件</button>
+                                <input type="file" id="h2-file-input" class="hidden" accept=".txt,.md,.html,.template" multiple>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select id="h2-template-select" class="px-2 py-1 border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-sm flex-1">
+                                    <option value="">-- 选择模板 --</option>
+                                </select>
+                                <button id="apply-h2-btn" class="px-2 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors text-sm">应用</button>
+                            </div>
+                            <div class="mt-2 text-xs text-gray-500 dark:text-gray-400" id="h2-file-count">已上传: 0个文件</div>
+                        </div>
+                        
+                        <div class="border dark:border-gray-700 rounded-md p-3">
+                            <div class="mb-2">
+                                <h5 class="font-medium">尾部样式 (bottom)</h5>
+                            </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <button id="upload-bottom-btn" class="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-opacity-90 transition-colors text-sm flex-1">上传文件</button>
+                                <input type="file" id="bottom-file-input" class="hidden" accept=".txt,.md,.html,.template" multiple>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select id="bottom-template-select" class="px-2 py-1 border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-sm flex-1">
+                                    <option value="">-- 选择模板 --</option>
+                                </select>
+                                <button id="apply-bottom-btn" class="px-2 py-1 bg-primary text-white rounded hover:bg-opacity-90 transition-colors text-sm">应用</button>
+                            </div>
+                            <div class="mt-2 text-xs text-gray-500 dark:text-gray-400" id="bottom-file-count">已上传: 0个文件</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="mt-10 text-center text-gray-600 dark:text-gray-400 text-sm">
+            <p>代运营神器-包子 | 用❤️制作</p>
+            <p class="text-xs mt-1 text-gray-500 dark:text-gray-500">© 2025 代运营神器-包子</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 登录系统相关元素
+            const loginContainer = document.getElementById('login-container');
+            const adminPanel = document.getElementById('admin-panel');
+            const appContainer = document.getElementById('app-container');
+            
+            // 登录表单相关元素
+            const adminLoginTab = document.getElementById('admin-login-tab');
+            const userLoginTab = document.getElementById('user-login-tab');
+            const adminLoginForm = document.getElementById('admin-login-form');
+            const userLoginForm = document.getElementById('user-login-form');
+            const adminUsername = document.getElementById('admin-username');
+            const adminPassword = document.getElementById('admin-password');
+            const cardKey = document.getElementById('card-key');
+            const adminLoginBtn = document.getElementById('admin-login-btn');
+            const userLoginBtn = document.getElementById('user-login-btn');
+            
+            // 管理员面板相关元素
+            const enterAppBtn = document.getElementById('enter-app-btn');
+            const logoutAdminBtn = document.getElementById('logout-admin-btn');
+            const cardCount = document.getElementById('card-count');
+            const cardExpiry = document.getElementById('card-expiry');
+            const generateKeysBtn = document.getElementById('generate-keys-btn');
+            const exportKeysBtn = document.getElementById('export-keys-btn');
+            const importKeysBtn = document.getElementById('import-keys-btn');
+            const keysTableBody = document.getElementById('keys-table-body');
+            
+            // 创建一个隐藏的文件输入元素，用于导入卡密
+            const keysFileInput = document.createElement('input');
+            keysFileInput.type = 'file';
+            keysFileInput.accept = '.json';
+            keysFileInput.style.display = 'none';
+            document.body.appendChild(keysFileInput);
+            
+            // 管理员信息（这应该从服务器获取，但在这里硬编码）
+            const adminCredentials = {
+                username: '16673039641',
+                password: 'ss641520'
+            };
+            
+            // 卡密信息存储
+            let cardKeys = [];
+            
+            // 生成设备指纹，用于标识不同的设备
+            function generateDeviceFingerprint() {
+                const userAgent = navigator.userAgent;
+                const language = navigator.language;
+                const platform = navigator.platform;
+                const screenWidth = window.screen.width;
+                const screenHeight = window.screen.height;
+                const colorDepth = window.screen.colorDepth;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                // 组合这些信息生成一个较为唯一的指纹
+                const rawFingerprint = `${userAgent}|${language}|${platform}|${screenWidth}x${screenHeight}|${colorDepth}|${timezone}`;
+                
+                // 使用简单的哈希函数将原始指纹转换为固定长度的字符串
+                function simpleHash(str) {
+                    let hash = 0;
+                    if (str.length === 0) return hash;
+                    for (let i = 0; i < str.length; i++) {
+                        const char = str.charCodeAt(i);
+                        hash = ((hash << 5) - hash) + char;
+                        hash = hash & hash; // Convert to 32bit integer
+                    }
+                    return Math.abs(hash).toString(16); // 转为16进制字符串
+                }
+                
+                return simpleHash(rawFingerprint);
+            }
+            
+            // 获取当前设备的指纹
+            const currentDeviceFingerprint = generateDeviceFingerprint();
+            
+            // 管理登录状态（会话中）
+            let isLoggedIn = false;
+            let isAdmin = false;
+            
+            // 登录表单切换
+            adminLoginTab.addEventListener('click', () => {
+                adminLoginTab.classList.add('bg-primary', 'text-white');
+                adminLoginTab.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                userLoginTab.classList.remove('bg-primary', 'text-white');
+                userLoginTab.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                
+                adminLoginForm.classList.remove('hidden');
+                userLoginForm.classList.add('hidden');
+            });
+            
+            userLoginTab.addEventListener('click', () => {
+                userLoginTab.classList.add('bg-primary', 'text-white');
+                userLoginTab.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                adminLoginTab.classList.remove('bg-primary', 'text-white');
+                adminLoginTab.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                
+                userLoginForm.classList.remove('hidden');
+                adminLoginForm.classList.add('hidden');
+            });
+            
+            // 管理员登录处理
+            adminLoginBtn.addEventListener('click', () => {
+                const username = adminUsername.value.trim();
+                const password = adminPassword.value.trim();
+                
+                if (!username || !password) {
+                    alert('请输入管理员账号和密码');
+                    return;
+                }
+                
+                if (username === adminCredentials.username && password === adminCredentials.password) {
+                    isLoggedIn = true;
+                    isAdmin = true;
+                    
+                    // 如果选择了记住账号密码
+                    if (rememberAdmin.checked) {
+                        try {
+                            // 保存到localStorage
+                            localStorage.setItem('adminCredentials', JSON.stringify({
+                                username: username,
+                                password: password
+                            }));
+                        } catch (error) {
+                            console.error('保存管理员账号密码失败:', error);
+                        }
+                    } else {
+                        // 清除之前保存的记录
+                        try {
+                            localStorage.removeItem('adminCredentials');
+                        } catch (error) {
+                            console.error('清除管理员账号密码失败:', error);
+                        }
+                    }
+                    
+                    // 显示管理员面板
+                    loginContainer.classList.add('hidden');
+                    adminPanel.classList.remove('hidden');
+                    
+                    // 更新卡密表格
+                    updateCardKeysTable();
+                } else {
+                    alert('管理员账号或密码错误');
+                }
+            });
+            
+            // 登出处理
+            logoutAdminBtn.addEventListener('click', () => {
+                isLoggedIn = false;
+                isAdmin = false;
+                
+                // 清空登录表单
+                adminUsername.value = '';
+                adminPassword.value = '';
+                cardKey.value = '';
+                
+                // 显示登录界面
+                adminPanel.classList.add('hidden');
+                appContainer.classList.add('hidden');
+                loginContainer.classList.remove('hidden');
+                
+                // 重置表单到管理员登录
+                adminLoginTab.click();
+            });
+            
+            // 进入应用按钮
+            enterAppBtn.addEventListener('click', () => {
+                adminPanel.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+            });
+            
+            // 用户登录（卡密验证）处理
+            userLoginBtn.addEventListener('click', () => {
+                const key = cardKey.value.trim();
+                
+                if (!key) {
+                    alert('请输入卡密');
+                    return;
+                }
+                
+                // 添加调试信息，查看所有卡密
+                console.log('当前所有卡密:', JSON.stringify(cardKeys));
+                console.log('当前设备指纹:', currentDeviceFingerprint);
+                
+                // 验证卡密 - 使用不区分大小写的比较
+                const validKey = cardKeys.find(k => 
+                    k.key.toUpperCase() === key.toUpperCase() && 
+                    k.status === '有效' && 
+                    new Date(k.expiryDate) > new Date()
+                );
+                
+                // 检查是否是已使用的卡密，但在当前设备上使用过（允许同一设备重复使用）
+                const usedKeyOnThisDevice = cardKeys.find(k => 
+                    k.key.toUpperCase() === key.toUpperCase() && 
+                    k.status === '已使用' &&
+                    k.deviceId === currentDeviceFingerprint &&
+                    new Date(k.expiryDate) > new Date()
+                );
+                
+                if (validKey || usedKeyOnThisDevice) {
+                    isLoggedIn = true;
+                    isAdmin = false;
+                    
+                    // 标记卡密为已使用，并关联到当前设备
+                    if (validKey) {
+                        validKey.status = '已使用';
+                        validKey.deviceId = currentDeviceFingerprint;
+                    }
+                    
+                    // 如果选择了记住卡密
+                    if (rememberUser.checked) {
+                        try {
+                            localStorage.setItem('userCardKey', key);
+                        } catch (error) {
+                            console.error('保存卡密失败:', error);
+                        }
+                    } else {
+                        try {
+                            localStorage.removeItem('userCardKey');
+                        } catch (error) {
+                            console.error('清除卡密失败:', error);
+                        }
+                    }
+                    
+                    // 清空卡密输入
+                    cardKey.value = '';
+                    
+                    // 显示应用界面
+                    loginContainer.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                    
+                    // 如果是管理员，也要更新卡密表格
+                    if (adminPanel.classList.contains('hidden') === false) {
+                        updateCardKeysTable();
+                    }
+                    
+                    alert(`登录成功！欢迎使用代运营神器-包子`);
+                } else {
+                    // 调试: 打印用户输入的卡密
+                    console.log('用户尝试使用的卡密:', key);
+                    
+                    // 检查卡密是否存在但已过期或已使用 - 不区分大小写
+                    const existingKey = cardKeys.find(k => k.key.toUpperCase() === key.toUpperCase());
+                    if (existingKey) {
+                        if (existingKey.status === '已使用') {
+                            if (existingKey.deviceId && existingKey.deviceId !== currentDeviceFingerprint) {
+                                alert('该卡密已在其他设备上使用，一个卡密只能在一台设备上使用');
+                            } else {
+                                alert('卡密已被使用');
+                            }
+                        } else if (new Date(existingKey.expiryDate) <= new Date()) {
+                            alert('卡密已过期');
+                        } else {
+                            alert('卡密验证失败，请联系管理员');
+                        }
+                    } else {
+                        alert('无效的卡密，请确认输入正确');
+                    }
+                }
+            });
+            
+            // 生成卡密
+            generateKeysBtn.addEventListener('click', () => {
+                const count = parseInt(cardCount.value) || 5;
+                const days = parseInt(cardExpiry.value) || 30;
+                
+                if (count <= 0 || count > 100) {
+                    alert('生成数量应在1-100之间');
+                    return;
+                }
+                
+                if (days <= 0) {
+                    alert('有效期必须大于0天');
+                    return;
+                }
+                
+                // 生成卡密
+                const newKeys = generateKeys(count, days);
+                cardKeys = [...cardKeys, ...newKeys];
+                
+                // 更新表格
+                updateCardKeysTable();
+                
+                // 显示生成的卡密
+                let keysMessage = `成功生成${count}个卡密：\n\n`;
+                newKeys.forEach(key => {
+                    keysMessage += `${key.key}\n`;
+                });
+                alert(keysMessage);
+                
+                // 显示成功消息
+                alert(`成功生成${count}个卡密`);
+            });
+            
+            // 更新卡密表格
+            function updateCardKeysTable() {
+                console.log('更新卡密表格:', cardKeys); // 调试信息
+                
+                // 清空表格
+                keysTableBody.innerHTML = '';
+                
+                if (cardKeys.length === 0) {
+                    keysTableBody.innerHTML = `
+                        <tr class="text-gray-700 dark:text-gray-300">
+                            <td colspan="4" class="py-4 px-4 border-b text-center">暂无卡密数据</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // 按创建时间降序排序
+                const sortedKeys = [...cardKeys].sort((a, b) => 
+                    new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+                );
+                
+                // 填充表格
+                sortedKeys.forEach(key => {
+                    const row = document.createElement('tr');
+                    row.className = 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700';
+                    
+                    // 确定状态样式
+                    let statusClass = '';
+                    if (key.status === '有效') {
+                        statusClass = 'text-green-600 dark:text-green-400';
+                    } else if (key.status === '已使用') {
+                        statusClass = 'text-yellow-600 dark:text-yellow-400';
+                    } else if (key.status === '已过期') {
+                        statusClass = 'text-red-600 dark:text-red-400';
+                    }
+                    
+                    // 检查是否已过期
+                    const now = new Date();
+                    const expiryDate = new Date(key.expiryDate);
+                    if (expiryDate < now && key.status === '有效') {
+                        key.status = '已过期';
+                        statusClass = 'text-red-600 dark:text-red-400';
+                    }
+                    
+                    // 格式化日期
+                    const formatDate = (dateString) => {
+                        const date = new Date(dateString);
+                        return date.toLocaleString('zh-CN');
+                    };
+                    
+                    // 显示设备信息（如果有）
+                    const deviceInfo = key.deviceId ? 
+                        `<span class="text-xs text-gray-500 dark:text-gray-400 block mt-1">${
+                            key.deviceId === currentDeviceFingerprint ? 
+                            '(当前设备)' : 
+                            '(其他设备)'
+                        }</span>` : '';
+                    
+                    row.innerHTML = `
+                        <td class="py-2 px-4 border-b font-mono">${key.key}</td>
+                        <td class="py-2 px-4 border-b">${formatDate(key.createdDate)}</td>
+                        <td class="py-2 px-4 border-b">${formatDate(key.expiryDate)}</td>
+                        <td class="py-2 px-4 border-b ${statusClass}">
+                            ${key.status}
+                            ${key.status === '已使用' ? deviceInfo : ''}
+                        </td>
+                    `;
+                    
+                    keysTableBody.appendChild(row);
+                });
+            }
+            
+            // 生成随机卡密函数
+            function generateKeys(count, days) {
+                const keys = [];
+                const now = new Date();
+                const expiry = new Date(now);
+                expiry.setDate(expiry.getDate() + days);
+                
+                for (let i = 0; i < count; i++) {
+                    // 创建一个卡密对象
+                    const newKey = {
+                        key: generateRandomKey(),
+                        createdDate: now.toISOString(),
+                        expiryDate: expiry.toISOString(),
+                        status: '有效'
+                    };
+                    
+                    // 确保生成的卡密显示在管理界面中
+                    console.log('生成新卡密:', newKey.key);
+                    keys.push(newKey);
+                }
+                
+                return keys;
+            }
+            
+            // 生成单个随机卡密
+            function generateRandomKey() {
+                // 生成形如 XXXX-XXXX-XXXX-XXXX 的卡密，其中X为大写字母或数字
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let key = '';
+                
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        key += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    if (i < 3) key += '-';
+                }
+                
+                return key;
+            }
+            
+            // 导出卡密
+            exportKeysBtn.addEventListener('click', () => {
+                try {
+                    if (cardKeys.length === 0) {
+                        alert('没有卡密可导出');
+                        return;
+                    }
+                    
+                    // 导出为JSON
+                    const keysData = {
+                        timestamp: new Date().toISOString(),
+                        keys: cardKeys
+                    };
+                    
+                    const keysJson = JSON.stringify(keysData, null, 2);
+                    const blob = new Blob([keysJson], { type: 'application/json' });
+                    
+                    // 创建下载链接
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `card-keys-${new Date().toISOString().slice(0, 10)}.json`;
+                    
+                    // 触发下载并清理
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    alert('卡密导出成功');
+                } catch (error) {
+                    console.error('导出卡密失败:', error);
+                    alert('导出卡密失败: ' + error.message);
+                }
+            });
+            
+            // 导入卡密
+            importKeysBtn.addEventListener('click', () => {
+                keysFileInput.click();
+            });
+            
+            keysFileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        // 验证文件格式
+                        if (!data.keys || !Array.isArray(data.keys)) {
+                            throw new Error('无效的卡密文件格式');
+                        }
+                        
+                        // 合并导入的卡密，保留已有卡密（避免重复）
+                        const existingKeys = new Set(cardKeys.map(k => k.key));
+                        
+                        // 过滤出新的卡密
+                        const newKeys = data.keys.filter(k => !existingKeys.has(k.key));
+                        
+                        // 合并卡密列表
+                        cardKeys = [...cardKeys, ...newKeys];
+                        
+                        // 更新表格
+                        updateCardKeysTable();
+                        
+                        alert(`成功导入${newKeys.length}个卡密，已忽略${data.keys.length - newKeys.length}个重复卡密`);
+                    } catch (error) {
+                        console.error('导入卡密失败:', error);
+                        alert('导入卡密失败: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+                
+                // 清空文件输入，以便再次选择同一文件
+                keysFileInput.value = '';
+            });
+            
+            // 回车键登录
+            adminPassword.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    adminLoginBtn.click();
+                }
+            });
+            
+            cardKey.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    userLoginBtn.click();
+                }
+            });
+            
+            // 获取记住登录相关元素
+            const rememberAdmin = document.getElementById('remember-admin');
+            const rememberUser = document.getElementById('remember-user');
+            
+            // 检查是否已有默认卡密，如果没有则添加一个测试卡密
+            if (cardKeys.length === 0) {
+                const now = new Date();
+                const expiry = new Date(now);
+                expiry.setFullYear(expiry.getFullYear() + 1); // 默认测试卡密有效期1年
+                
+                cardKeys.push({
+                    key: 'TEST-1234-ABCD-5678',
+                    createdDate: now.toISOString(),
+                    expiryDate: expiry.toISOString(),
+                    status: '有效'
+                });
+            }
+            
+            // 记住登录功能
+            try {
+                // 检查是否有保存的管理员账号
+                const savedAdmin = JSON.parse(localStorage.getItem('adminCredentials'));
+                if (savedAdmin) {
+                    adminUsername.value = savedAdmin.username;
+                    adminPassword.value = savedAdmin.password;
+                    rememberAdmin.checked = true;
+                }
+                
+                // 检查是否有保存的卡密
+                const savedCardKey = localStorage.getItem('userCardKey');
+                if (savedCardKey) {
+                    cardKey.value = savedCardKey;
+                    rememberUser.checked = true;
+                }
+            } catch (error) {
+                console.error('读取保存的登录信息失败:', error);
+            }
+            const inputText = document.getElementById('input-text');
+            // 获取预览容器元素，注意手机和电脑预览都使用相同ID
+            const previewContent = document.querySelectorAll('#nice')[0];
+            const mobilePreviewContent = document.querySelectorAll('#nice')[1];
+            const htmlContent = document.getElementById('html-content');
+            const toHtmlBtn = document.getElementById('to-html-btn');
+            const toMarkdownBtn = document.getElementById('to-markdown-btn');
+            const copyHtmlBtn = document.getElementById('copy-html-btn');
+            const copyPreviewBtn = document.getElementById('copy-preview-btn');
+            const previewTab = document.getElementById('preview-tab');
+            const htmlTab = document.getElementById('html-tab');
+            const clearBtn = document.getElementById('clear-btn');
+            const importBtn = document.getElementById('import-btn');
+            const fileInput = document.getElementById('file-input');
+            // 获取模板按钮和文件输入元素
+            const uploadTopBtn = document.getElementById('upload-top-btn');
+            const uploadH2Btn = document.getElementById('upload-h2-btn');
+            const uploadBottomBtn = document.getElementById('upload-bottom-btn');
+            const topFileInput = document.getElementById('top-file-input');
+            const h2FileInput = document.getElementById('h2-file-input');
+            const bottomFileInput = document.getElementById('bottom-file-input');
+            const applyTopBtn = document.getElementById('apply-top-btn');
+            const applyH2Btn = document.getElementById('apply-h2-btn');
+            const applyBottomBtn = document.getElementById('apply-bottom-btn');
+            const topFileName = document.getElementById('top-file-name');
+            const h2FileName = document.getElementById('h2-file-name');
+            const bottomFileName = document.getElementById('bottom-file-name');
+            
+            // 设置 marked 选项
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                headerIds: true
+            });
+            
+            // 预览模式相关元素
+            const pcPreviewBtn = document.getElementById('pc-preview-btn');
+            const mobilePreviewBtn = document.getElementById('mobile-preview-btn');
+            const mobileContainer = document.getElementById('mobile-container');
+            
+            // 当前预览模式（默认为PC）
+            let currentPreviewMode = 'pc';
+            
+            // 转换为 HTML 函数 - 只更新预览，不改变输入内容
+            function convertToHtml() {
+                try {
+                    // 检查输入是否为空
+                    if (!inputText.value.trim()) {
+                        alert('请先输入内容再进行转换');
+                        return;
+                    }
+                    
+                    const markdown = inputText.value;
+                    const html = marked.parse(markdown);
+                    
+                    // 只更新预览内容，不改变输入框内容
+                    previewContent.innerHTML = html;
+                    mobilePreviewContent.innerHTML = html;
+                    htmlContent.value = html;
+                    showPreviewTab();
+                    
+                    // 显示成功消息
+                    showOperationMessage(toHtmlBtn, '已转换');
+                } catch (error) {
+                    console.error('转换为 HTML 时出错:', error);
+                    const errorMsg = `<div class="text-red-500">转换为 HTML 时出错: ${error.message}</div>`;
+                    previewContent.innerHTML = errorMsg;
+                    mobilePreviewContent.innerHTML = errorMsg;
+                    alert('转换失败: ' + error.message);
+                }
+            }
+            
+            // 基本的 HTML 转 Markdown 转换 - 只更新预览，不改变输入内容
+            function convertToMarkdown() {
+                try {
+                    // 检查输入是否为空
+                    if (!inputText.value.trim()) {
+                        alert('请先输入内容再进行转换');
+                        return;
+                    }
+                    
+                    // 获取输入的HTML内容
+                    let htmlContent = inputText.value;
+                    // 这是一个非常基础的 HTML 到 Markdown 转换器
+                    // 在实际应用中，应该使用像 turndown.js 这样的库
+                    // 先处理图片标签，确保能捕获到所有图片
+                    // 查找所有img标签并提取src和alt属性
+                    const imgTags = htmlContent.match(/<img[^>]*>/gi) || [];
+                    let imageMap = [];
+                    
+                    // 保存所有图片信息
+                    for (let i = 0; i < imgTags.length; i++) {
+                        const imgTag = imgTags[i];
+                        const srcMatch = imgTag.match(/src=["'](.*?)["']/i);
+                        const altMatch = imgTag.match(/alt=["'](.*?)["']/i);
+                        
+                        if (srcMatch && srcMatch[1]) {
+                            const src = srcMatch[1];
+                            const alt = (altMatch && altMatch[1]) ? altMatch[1] : `图片${i+1}`;
+                            const placeholder = `IMG_PLACEHOLDER_${i}`;
+                            
+                            // 替换原始HTML中的图片标签为占位符
+                            htmlContent = htmlContent.replace(imgTag, placeholder);
+                            
+                            // 保存图片信息
+                            imageMap.push({
+                                placeholder: placeholder,
+                                markdown: `![${alt}](${src})`
+                            });
+                        }
+                    }
+                    
+                    // 常规HTML转Markdown处理
+                    let markdown = htmlContent
+                        .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n')
+                        .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n')
+                        .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n')
+                        .replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1\n\n')
+                        .replace(/<h5[^>]*>(.*?)<\/h5>/gi, '##### $1\n\n')
+                        .replace(/<h6[^>]*>(.*?)<\/h6>/gi, '###### $1\n\n')
+                        .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+                        .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+                        .replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**')
+                        .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+                        .replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*')
+                        .replace(/<a[^>]*href="(.*?)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)')
+                        .replace(/<ul[^>]*>(.*?)<\/ul>/gis, '$1\n')
+                        .replace(/<ol[^>]*>(.*?)<\/ol>/gis, '$1\n')
+                        .replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n')
+                        .replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`')
+                        .replace(/<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>/gis, '```\n$1\n```\n\n')
+                        .replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gis, '> $1\n\n')
+                        .replace(/<hr[^>]*>/gi, '---\n\n')
+                        .replace(/<br[^>]*>/gi, '\n')
+                        .replace(/&nbsp;/g, ' ')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&amp;/g, '&');
+                    
+                    // 替换图片占位符为Markdown图片语法
+                    imageMap.forEach(img => {
+                        markdown = markdown.replace(img.placeholder, img.markdown);
+                    });
+                        
+                    // 移除剩余的 HTML 标签
+                    markdown = markdown.replace(/<[^>]*>/g, '');
+                    
+                    // 修复多个换行
+                    markdown = markdown.replace(/\n\s*\n\s*\n/g, '\n\n');
+                    
+                    // 生成预览HTML（直接从Markdown而不是原始输入）
+                    const convertedHtml = marked.parse(markdown);
+                    
+                    // 只更新预览，不改变输入内容
+                    previewContent.innerHTML = convertedHtml;
+                    mobilePreviewContent.innerHTML = convertedHtml;
+                    htmlContent.value = convertedHtml;
+                    showPreviewTab();
+                    
+                    // 显示成功消息
+                    showOperationMessage(toMarkdownBtn, '已转换');
+                } catch (error) {
+                    console.error('转换为 Markdown 时出错:', error);
+                    const errorMsg = `<div class="text-red-500">转换为 Markdown 时出错: ${error.message}</div>`;
+                    previewContent.innerHTML = errorMsg;
+                    mobilePreviewContent.innerHTML = errorMsg;
+                    alert('转换失败: ' + error.message);
+                }
+            }
+            
+            // 切换预览模式函数
+            function switchPreviewMode(mode) {
+                currentPreviewMode = mode;
+                
+                if (mode === 'pc') {
+                    // 切换到电脑预览模式
+                    previewContent.classList.remove('hidden');
+                    mobileContainer.classList.add('hidden');
+                    
+                    // 更新按钮样式
+                    pcPreviewBtn.classList.add('bg-primary', 'text-white');
+                    pcPreviewBtn.classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                    mobilePreviewBtn.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                    mobilePreviewBtn.classList.remove('bg-primary', 'text-white');
+                } else if (mode === 'mobile') {
+                    // 切换到手机预览模式
+                    previewContent.classList.add('hidden');
+                    mobileContainer.classList.remove('hidden');
+                    
+                    // 更新按钮样式
+                    mobilePreviewBtn.classList.add('bg-primary', 'text-white');
+                    mobilePreviewBtn.classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                    pcPreviewBtn.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                    pcPreviewBtn.classList.remove('bg-primary', 'text-white');
+                }
+            }
+            
+            // 获取CSS相关元素
+            const cssTab = document.getElementById('css-tab');
+            const cssContainer = document.getElementById('css-container');
+            const customCssEditor = document.getElementById('custom-css');
+            const applyCssBtn = document.getElementById('apply-css-btn');
+            const saveCssBtn = document.getElementById('save-css-btn');
+            const resetCssBtn = document.getElementById('reset-css-btn');
+            
+            // 存储自定义CSS的样式元素
+            let customStyleElement = null;
+            
+            // 标签切换函数
+            function showPreviewTab() {
+                // 隐藏其他内容
+                htmlContent.classList.add('hidden');
+                
+                // 隐藏CSS面板
+                const cssContainer = document.getElementById('css-container');
+                cssContainer.classList.add('hidden');
+                const cssBtn = document.getElementById('css-btn');
+                cssBtn.classList.remove('bg-primary', 'text-white');
+                cssBtn.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                
+                // 根据当前预览模式选择显示电脑或手机预览
+                if (currentPreviewMode === 'pc') {
+                    previewContent.classList.remove('hidden');
+                    mobileContainer.classList.add('hidden');
+                } else {
+                    previewContent.classList.add('hidden');
+                    mobileContainer.classList.remove('hidden');
+                }
+                
+                // 更新标签按钮样式
+                previewTab.classList.add('bg-primary', 'text-white');
+                previewTab.classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                htmlTab.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                htmlTab.classList.remove('bg-primary', 'text-white');
+            }
+            
+            function showHtmlTab() {
+                // 隐藏所有其他内容
+                previewContent.classList.add('hidden');
+                mobileContainer.classList.add('hidden');
+                
+                // 隐藏CSS面板
+                const cssContainer = document.getElementById('css-container');
+                cssContainer.classList.add('hidden');
+                const cssBtn = document.getElementById('css-btn');
+                cssBtn.classList.remove('bg-primary', 'text-white');
+                cssBtn.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                
+                // 显示HTML内容
+                htmlContent.classList.remove('hidden');
+                
+                // 更新标签按钮样式
+                htmlTab.classList.add('bg-primary', 'text-white');
+                htmlTab.classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                previewTab.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                previewTab.classList.remove('bg-primary', 'text-white');
+            }
+            
+            // 应用自定义CSS样式
+            function applyCustomCss() {
+                const css = customCssEditor.value;
+                
+                // 移除之前的自定义样式
+                if (customStyleElement) {
+                    document.head.removeChild(customStyleElement);
+                }
+                
+                // 创建新的样式元素
+                if (css.trim()) {
+                    // 处理CSS代码，替换#nice选择器
+                    const processedCss = processNiceSelectors(css);
+                    
+                    customStyleElement = document.createElement('style');
+                    customStyleElement.id = 'custom-user-css';
+                    customStyleElement.textContent = processedCss;
+                    document.head.appendChild(customStyleElement);
+                    
+                    // 添加辅助样式，确保预览区域有合适的大小和边距
+                    const helperStyles = document.createElement('style');
+                    helperStyles.textContent = `
+                        .preview-content {
+                            padding: 30px !important;
+                            font-family: PingFangSC-Light !important;
+                            word-break: break-all !important;
+                        }
+                    `;
+                    document.head.appendChild(helperStyles);
+                }
+                
+                // 显示成功消息
+                showOperationMessage(applyCssBtn, '已应用');
+                
+                // 添加示例CSS到占位符
+                if (customCssEditor.value === '') {
+                    customCssEditor.setAttribute('placeholder', `/* 示例CSS:
+#nice {
+    font-family: PingFangSC-Light;
+    padding: 30px;
+    word-break: break-all;
+}
+
+#nice p:nth-of-type(3n+1) {
+    color: #ab089f;
+    margin: 10px 10px;
+    line-height: 1.75;
+    letter-spacing: 0.2em;
+    font-size: 14px;
+}
+
+#nice h1 {
+    border-bottom: 2px solid #7c8962;
+    font-size: 1.3em;
+    text-align: center;
+    margin: 20px 0;
+}
+*/`);
+                }
+            }
+            
+            // 处理CSS中的#nice选择器，转换为适配我们预览容器的选择器
+            function processNiceSelectors(css) {
+                // 匹配所有可能的#nice选择器模式
+                const niceRegexes = [
+                    { 
+                        // 匹配"#nice"开头的选择器
+                        pattern: /#nice(?=\s*[,{])/g, 
+                        replacement: '.preview-content' 
+                    },
+                    { 
+                        // 匹配"#nice."开头的选择器
+                        pattern: /#nice\.([a-zA-Z0-9_-]+)/g, 
+                        replacement: '.preview-content.$1' 
+                    },
+                    { 
+                        // 匹配"#nice "开头的选择器 (包含子选择器)
+                        pattern: /#nice\s+([\.#a-zA-Z0-9_-])/g, 
+                        replacement: '.preview-content $1' 
+                    },
+                    { 
+                        // 匹配"#nice:"开头的伪选择器
+                        pattern: /#nice:([a-zA-Z0-9_-]+)/g, 
+                        replacement: '.preview-content:$1' 
+                    },
+                    { 
+                        // 匹配"#nice["开头的属性选择器
+                        pattern: /#nice\[([^\]]+)\]/g, 
+                        replacement: '.preview-content[$1]' 
+                    }
+                ];
+                
+                // 应用所有可能的替换
+                let processedCss = css;
+                niceRegexes.forEach(regex => {
+                    processedCss = processedCss.replace(regex.pattern, regex.replacement);
+                });
+                
+                return processedCss;
+            }
+            
+            // 内存中存储CSS
+            let savedCssInMemory = '';
+            
+            // 保存CSS到内存
+            function saveCustomCss() {
+                try {
+                    // 只保存在内存中
+                    savedCssInMemory = customCssEditor.value;
+                    showOperationMessage(saveCssBtn, '已保存');
+                } catch (error) {
+                    console.error('保存CSS失败:', error);
+                    alert('保存CSS失败');
+                }
+            }
+            
+            // 重置CSS样式
+            function resetCustomCss() {
+                // 确认是否要重置
+                if (confirm('确定要重置自定义CSS样式吗？这将删除所有自定义样式。')) {
+                    // 清空编辑器
+                    customCssEditor.value = '';
+                    
+                    // 移除应用的样式
+                    if (customStyleElement) {
+                        document.head.removeChild(customStyleElement);
+                        customStyleElement = null;
+                    }
+                    
+                    // 清空内存中的CSS
+                    savedCssInMemory = '';
+                    
+                    // 显示成功消息
+                    showOperationMessage(resetCssBtn, '已重置');
+                }
+            }
+            
+            // 加载保存的CSS
+            function loadSavedCss() {
+                // 使用内存中的CSS
+                if (savedCssInMemory) {
+                    customCssEditor.value = savedCssInMemory;
+                    applyCustomCss();
+                }
+            }
+            
+            // 复制函数
+            async function copyToClipboard(text) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (err) {
+                    console.error('复制失败: ', err);
+                    return false;
+                }
+            }
+            
+            // 统一显示操作消息的函数
+            function showOperationMessage(button, message) {
+                const originalText = button.textContent;
+                const originalBgColor = button.classList.contains('bg-primary') ? 'bg-primary' : 'bg-gray-500';
+                button.textContent = `✓ ${message}`;
+                button.classList.remove(originalBgColor);
+                button.classList.add('bg-green-600');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('bg-green-600');
+                    button.classList.add(originalBgColor);
+                }, 2000);
+            }
+            
+            function showCopiedMessage(button, originalText) {
+                showOperationMessage(button, '已复制!');
+            }
+            
+            // 获取文件名显示元素
+            const currentFileName = document.getElementById('current-file-name');
+            
+            // 导入文件函数
+            function handleFileImport(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                // 显示文件名 - 不带后缀
+                const fileName = file.name.lastIndexOf('.') !== -1 ? 
+                    file.name.substring(0, file.name.lastIndexOf('.')) : file.name;
+                currentFileName.textContent = `当前文件: ${fileName}`;
+                currentFileName.classList.remove('hidden');
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    inputText.value = e.target.result;
+                    if (file.name.endsWith('.md') || file.name.endsWith('.markdown')) {
+                        convertToHtml();
+                    } else if (file.name.endsWith('.html')) {
+                        // 对于 HTML 文件，直接在预览中显示
+                        previewContent.innerHTML = e.target.result;
+                        htmlContent.value = e.target.result;
+                        showPreviewTab();
+                    } else {
+                        // 对于其他文件，当作 markdown 处理
+                        convertToHtml();
+                    }
+                };
+                reader.readAsText(file);
+            }
+            
+            // 加载模板
+
+            
+            // CSS相关事件监听器
+            const cssBtn = document.getElementById('css-btn');
+            const toggleCssEditorBtn = document.getElementById('toggle-css-editor');
+            const toggleIcon = document.getElementById('toggle-icon');
+            const cssEditorContainer = document.getElementById('css-editor-container');
+            
+            cssBtn.addEventListener('click', toggleCssPanel);
+            applyCssBtn.addEventListener('click', applyCustomCss);
+            saveCssBtn.addEventListener('click', saveCustomCss);
+            resetCssBtn.addEventListener('click', resetCustomCss);
+            toggleCssEditorBtn.addEventListener('click', toggleCssEditor);
+            
+            // CSS编辑器的折叠/展开状态
+            let cssEditorExpanded = true;
+            
+            // 切换CSS编辑器的折叠/展开状态
+            function toggleCssEditor() {
+                cssEditorExpanded = !cssEditorExpanded;
+                
+                if (cssEditorExpanded) {
+                    // 展开编辑器
+                    cssEditorContainer.style.display = 'block';
+                    toggleIcon.textContent = '📕'; // 关闭图标
+                } else {
+                    // 折叠编辑器
+                    cssEditorContainer.style.display = 'none';
+                    toggleIcon.textContent = '📖'; // 打开图标
+                }
+            }
+            
+            // 切换CSS面板的显示/隐藏
+            function toggleCssPanel() {
+                const cssContainer = document.getElementById('css-container');
+                
+                if (cssContainer.classList.contains('hidden')) {
+                    // 显示CSS面板
+                    cssContainer.classList.remove('hidden');
+                    cssBtn.classList.add('bg-primary', 'text-white');
+                    cssBtn.classList.remove('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                } else {
+                    // 隐藏CSS面板
+                    cssContainer.classList.add('hidden');
+                    cssBtn.classList.remove('bg-primary', 'text-white');
+                    cssBtn.classList.add('bg-gray-300', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+                }
+            }
+            
+            // 一般事件监听器
+            toHtmlBtn.addEventListener('click', convertToHtml);
+            toMarkdownBtn.addEventListener('click', convertToMarkdown);
+            previewTab.addEventListener('click', showPreviewTab);
+            htmlTab.addEventListener('click', showHtmlTab);
+            clearBtn.addEventListener('click', () => {
+                // 清空内容
+                inputText.value = '';
+                previewContent.innerHTML = '';
+                htmlContent.value = '';
+                
+                // 隐藏文件名显示
+                currentFileName.textContent = '';
+                currentFileName.classList.add('hidden');
+            });
+            
+            importBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', handleFileImport);
+            
+            copyHtmlBtn.addEventListener('click', async () => {
+                const success = await copyToClipboard(htmlContent.value);
+                if (success) {
+                    showCopiedMessage(copyHtmlBtn, '复制 HTML');
+                }
+            });
+            
+            copyPreviewBtn.addEventListener('click', () => {
+                // 保存用户当前的选择
+                const userSelection = window.getSelection();
+                const currentRange = userSelection.rangeCount > 0 ? userSelection.getRangeAt(0) : null;
+                
+                // 清除当前选择
+                userSelection.removeAllRanges();
+                
+                // 创建一个选择整个预览内容的范围
+                const range = document.createRange();
+                range.selectNodeContents(previewContent);
+                userSelection.addRange(range);
+                
+                // 执行复制命令
+                let success = false;
+                try {
+                    success = document.execCommand('copy');
+                } catch (err) {
+                    console.error('复制失败: ', err);
+                }
+                
+                // 恢复原来的选择
+                userSelection.removeAllRanges();
+                if (currentRange) {
+                    userSelection.addRange(currentRange);
+                }
+                
+                if (success) {
+                    showCopiedMessage(copyPreviewBtn, '复制预览内容');
+                }
+            });
+            
+            // 获取模板下拉选择元素
+            const topTemplateSelect = document.getElementById('top-template-select');
+            const h2TemplateSelect = document.getElementById('h2-template-select');
+            const bottomTemplateSelect = document.getElementById('bottom-template-select');
+            const topFileCount = document.getElementById('top-file-count');
+            const h2FileCount = document.getElementById('h2-file-count');
+            const bottomFileCount = document.getElementById('bottom-file-count');
+            
+            // 模板文件存储对象 - 使用内存存储
+            const templateCollections = {
+                top: [],
+                h2: [],
+                bottom: []
+            };
+            
+            // 导出/导入相关元素
+            const exportAllBtn = document.getElementById('export-all-btn');
+            const importAllBtn = document.getElementById('import-all-btn');
+            
+            // 创建一个隐藏的文件输入元素，用于导入设置
+            const settingsFileInput = document.createElement('input');
+            settingsFileInput.type = 'file';
+            settingsFileInput.accept = '.json';
+            settingsFileInput.style.display = 'none';
+            document.body.appendChild(settingsFileInput);
+            
+            // 导出所有设置函数
+            function exportAllSettings() {
+                try {
+                    // 收集所有模板和CSS样式
+                    const settings = {
+                        version: '1.0',
+                        timestamp: new Date().toISOString(),
+                        templates: {
+                            top: templateCollections.top,
+                            h2: templateCollections.h2,
+                            bottom: templateCollections.bottom
+                        },
+                        css: customCssEditor.value
+                    };
+                    
+                    // 转换为JSON并创建Blob
+                    const settingsJson = JSON.stringify(settings, null, 2);
+                    const blob = new Blob([settingsJson], { type: 'application/json' });
+                    
+                    // 创建下载链接
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `markdown-settings-${new Date().toISOString().slice(0, 10)}.json`;
+                    
+                    // 触发下载并清理
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    // 显示成功消息
+                    showOperationMessage(exportAllBtn, '已导出');
+                } catch (error) {
+                    console.error('导出设置失败:', error);
+                    alert('导出设置失败: ' + error.message);
+                }
+            }
+            
+            // 导入设置函数
+            function importSettings(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const settings = JSON.parse(e.target.result);
+                        
+                        // 验证设置文件格式
+                        if (!settings.templates || !settings.version) {
+                            throw new Error('无效的设置文件格式');
+                        }
+                        
+                        // 导入模板
+                        if (settings.templates.top) {
+                            templateCollections.top = settings.templates.top;
+                            updateTemplateUI('top', topTemplateSelect, topFileCount);
+                        }
+                        
+                        if (settings.templates.h2) {
+                            templateCollections.h2 = settings.templates.h2;
+                            updateTemplateUI('h2', h2TemplateSelect, h2FileCount);
+                        }
+                        
+                        if (settings.templates.bottom) {
+                            templateCollections.bottom = settings.templates.bottom;
+                            updateTemplateUI('bottom', bottomTemplateSelect, bottomFileCount);
+                        }
+                        
+                        // 导入CSS
+                        if (settings.css) {
+                            customCssEditor.value = settings.css;
+                            savedCssInMemory = settings.css;
+                            applyCustomCss();
+                        }
+                        
+                        // 显示成功消息
+                        showOperationMessage(importAllBtn, '已导入');
+                        
+                        // 显示导入的内容摘要
+                        const topCount = settings.templates.top ? settings.templates.top.length : 0;
+                        const h2Count = settings.templates.h2 ? settings.templates.h2.length : 0;
+                        const bottomCount = settings.templates.bottom ? settings.templates.bottom.length : 0;
+                        const hasCss = settings.css && settings.css.trim().length > 0;
+                        
+                        alert(`成功导入设置:\n- ${topCount}个头部模板\n- ${h2Count}个小标题模板\n- ${bottomCount}个尾部模板\n- CSS样式: ${hasCss ? '已导入' : '无'}`);
+                        
+                    } catch (error) {
+                        console.error('导入设置失败:', error);
+                        alert('导入设置失败: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+            
+            // 导出/导入按钮事件监听
+            exportAllBtn.addEventListener('click', exportAllSettings);
+            importAllBtn.addEventListener('click', () => {
+                settingsFileInput.click();
+            });
+            settingsFileInput.addEventListener('change', importSettings);
+            
+            // 注意：由于iframe沙盒限制，我们不使用localStorage，改为会话内存储
+            function loadSavedTemplates() {
+                // 在沙盒环境中无法访问localStorage，因此不加载任何保存的模板
+                // 这里可以添加提示信息
+                const infoMessage = document.createElement('div');
+                infoMessage.className = 'text-xs text-primary mt-1 text-center';
+                infoMessage.textContent = '提示: 使用上方的"导出所有设置"按钮保存您的模板和CSS样式，下次使用时可通过"导入设置"恢复';
+                document.querySelector('footer').before(infoMessage);
+            }
+            
+            // 由于沙盒限制，此函数实际上不会保存到localStorage
+            // 仅在当前会话中保留模板
+            function saveTemplatesToLocalStorage() {
+                // 不执行实际的localStorage保存操作
+                // console.log('模板已更新，但仅保留在当前会话中');
+            }
+            
+            // 更新模板UI
+            function updateTemplateUI(templateType, selectElement, countElement) {
+                const templates = templateCollections[templateType];
+                
+                // 清空旧的下拉选项（保留第一个默认选项）
+                while (selectElement.options.length > 1) {
+                    selectElement.remove(1);
+                }
+                
+                // 添加模板到下拉选项
+                templates.forEach((template, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = template.name;
+                    selectElement.appendChild(option);
+                });
+                
+                // 更新计数
+                const fileCount = templates.length;
+                countElement.textContent = `已保存: ${fileCount}个模板`;
+                
+                if (fileCount > 0) {
+                    countElement.classList.remove('text-gray-500', 'dark:text-gray-400');
+                    countElement.classList.add('text-green-600', 'dark:text-green-400');
+                    // 自动选择第一个模板
+                    selectElement.value = 0;
+                } else {
+                    countElement.classList.remove('text-green-600', 'dark:text-green-400');
+                    countElement.classList.add('text-gray-500', 'dark:text-gray-400');
+                }
+            }
+            
+            // 上传多个模板文件处理函数
+            function handleTemplateUpload(event, templateType, countElement, selectElement) {
+                const files = event.target.files;
+                if (!files || files.length === 0) return;
+                
+                // 提示用户正在处理
+                countElement.textContent = `处理中...`;
+                
+                // 使用 Promise.all 处理所有文件
+                const promises = Array.from(files).map(file => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            // 将文件内容和名称保存到集合中
+                            templateCollections[templateType].push({
+                                name: file.name,
+                                content: e.target.result
+                            });
+                            resolve();
+                        };
+                        reader.readAsText(file);
+                    });
+                });
+                
+                // 所有文件处理完成后更新UI
+                Promise.all(promises).then(() => {
+                    // 更新UI
+                    updateTemplateUI(templateType, selectElement, countElement);
+                    
+                    // 保存到localStorage
+                    saveTemplatesToLocalStorage();
+                });
+            }
+            
+            // 应用模板函数
+            function applyTemplate(templateType) {
+                const selectElement = document.getElementById(`${templateType}-template-select`);
+                const selectedIndex = selectElement.value;
+                
+                if (!selectedIndex || selectedIndex === '') {
+                    alert(`请先选择一个${templateType === 'top' ? '头部' : templateType === 'h2' ? '小标题' : '尾部'}模板`);
+                    return;
+                }
+                
+                // 获取选中的模板内容
+                const templateContent = templateCollections[templateType][selectedIndex].content;
+                
+                if (!templateContent || templateContent.trim() === '') {
+                    alert(`所选模板内容为空`);
+                    return;
+                }
+                
+                let currentContent = inputText.value;
+                
+                switch(templateType) {
+                    case 'top':
+                        // 添加到文章开头
+                        inputText.value = templateContent + '\n\n' + currentContent;
+                        break;
+                    case 'h2':
+                        // 获取光标位置
+                        const cursorPos = inputText.selectionStart;
+                        
+                        // 查找最近的h2标题位置
+                        if (cursorPos !== undefined) {
+                            // 查找当前光标前最近的h2标签 - 支持各种格式的h2标题
+                            // 支持包含星号和其他格式的二级标题
+                            const contentBeforeCursor = currentContent.substring(0, cursorPos);
+                            const h2Matches = [...contentBeforeCursor.matchAll(/^##\s+.*$/gm)];
+                            
+                            if (h2Matches.length > 0) {
+                                // 找到最后一个h2标签
+                                const lastH2Match = h2Matches[h2Matches.length - 1];
+                                const h2Index = lastH2Match.index;
+                                const h2Line = lastH2Match[0];
+                                
+                                // 查找h2所在行后的第一个新段落
+                                // 计算h2行的末尾位置
+                                const lineEndIndex = contentBeforeCursor.indexOf('\n', h2Index);
+                                const lineEnd = lineEndIndex !== -1 ? lineEndIndex : cursorPos;
+                                
+                                // 寻找下一个段落的开始位置
+                                const contentAfterTitle = currentContent.substring(lineEnd);
+                                // 检查是否已经有内容在标题下
+                                const nextBlockMatch = contentAfterTitle.match(/^\n+([^\n]+)/);
+                                let insertionPoint;
+                                
+                                if (nextBlockMatch) {
+                                    // 找到标题下的第一个内容块的末尾，在那里插入模板
+                                    const firstBlockEnd = lineEnd + nextBlockMatch[0].length;
+                                    insertionPoint = firstBlockEnd;
+                                } else {
+                                    // 如果标题下没有内容，直接在标题之后插入
+                                    insertionPoint = lineEnd;
+                                }
+                                
+                                // 在h2标题之后插入模板
+                                inputText.value = 
+                                    currentContent.substring(0, insertionPoint) + 
+                                    '\n\n' + templateContent + 
+                                    (insertionPoint < currentContent.length ? '\n' + currentContent.substring(insertionPoint) : '');
+                                
+                                // 显示成功提示
+                                alert(`已将小标题模板应用到"${h2Line.trim()}"之后`);
+                                
+                                // 转换并显示预览
+                                convertToHtml();
+                                
+                                // 显示操作成功消息
+                                const applyBtn = document.getElementById(`apply-h2-btn`);
+                                showOperationMessage(applyBtn, '已应用');
+                                return; // 提前返回，不执行后面的代码
+                            }
+                        }
+                        
+                        // 如果没有找到h2标签或没有选中位置，询问用户
+                        if (confirm('没有找到光标附近的二级标题(##)。是否要先添加一个二级标题，再应用此模板？')) {
+                            // 让用户输入标题文本
+                            const titleText = prompt('请输入二级标题内容：');
+                            if (titleText) {
+                                // 添加标题和模板
+                                const h2Title = `## ${titleText}`;
+                                
+                                // 在光标位置或文档末尾添加
+                                if (cursorPos !== undefined) {
+                                    inputText.value = 
+                                        currentContent.substring(0, cursorPos) + 
+                                        h2Title + '\n\n' + 
+                                        templateContent + '\n\n' + 
+                                        currentContent.substring(cursorPos);
+                                } else {
+                                    inputText.value = 
+                                        currentContent + '\n\n' + 
+                                        h2Title + '\n\n' + 
+                                        templateContent;
+                                }
+                            }
+                        } else {
+                            // 用户选择不添加标题，直接在光标位置添加模板
+                            if (cursorPos !== undefined) {
+                                inputText.value = 
+                                    currentContent.substring(0, cursorPos) + 
+                                    '\n\n' + templateContent + '\n\n' + 
+                                    currentContent.substring(cursorPos);
+                            } else {
+                                // 如果没有光标位置，添加到末尾
+                                inputText.value = currentContent + '\n\n' + templateContent;
+                            }
+                        }
+                        break;
+                    case 'bottom':
+                        // 添加到文章末尾
+                        inputText.value = currentContent + '\n\n' + templateContent;
+                        break;
+                }
+                
+                // 转换并显示预览
+                convertToHtml();
+                
+                // 显示操作成功消息
+                const applyBtn = document.getElementById(`apply-${templateType}-btn`);
+                showOperationMessage(applyBtn, '已应用');
+            }
+            
+            // 上传头部模板事件监听
+            uploadTopBtn.addEventListener('click', () => {
+                topFileInput.click();
+            });
+            
+            topFileInput.addEventListener('change', (event) => {
+                handleTemplateUpload(event, 'top', topFileCount, topTemplateSelect);
+            });
+            
+            // 上传小标题模板事件监听
+            uploadH2Btn.addEventListener('click', () => {
+                h2FileInput.click();
+            });
+            
+            h2FileInput.addEventListener('change', (event) => {
+                handleTemplateUpload(event, 'h2', h2FileCount, h2TemplateSelect);
+            });
+            
+            // 上传尾部模板事件监听
+            uploadBottomBtn.addEventListener('click', () => {
+                bottomFileInput.click();
+            });
+            
+            bottomFileInput.addEventListener('change', (event) => {
+                handleTemplateUpload(event, 'bottom', bottomFileCount, bottomTemplateSelect);
+            });
+            
+            // 应用模板事件监听
+            applyTopBtn.addEventListener('click', () => {
+                applyTemplate('top');
+            });
+            
+            applyH2Btn.addEventListener('click', () => {
+                applyTemplate('h2');
+            });
+            
+            applyBottomBtn.addEventListener('click', () => {
+                applyTemplate('bottom');
+            });
+            
+            // 添加电脑和手机预览模式切换事件监听
+            pcPreviewBtn.addEventListener('click', () => {
+                switchPreviewMode('pc');
+            });
+            
+            mobilePreviewBtn.addEventListener('click', () => {
+                switchPreviewMode('mobile');
+            });
+            
+            // 初始化为电脑预览模式
+            switchPreviewMode('pc');
+            
+            // 用户输入时自动转换（带防抖）
+            let debounceTimer;
+            inputText.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(convertToHtml, 500);
+            });
+            
+            // 添加密码显示/隐藏切换功能
+            const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+            togglePasswordButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const passwordInput = document.getElementById(targetId);
+                    const eyeOpen = this.querySelector('.eye-open');
+                    const eyeClosed = this.querySelector('.eye-closed');
+                    
+                    // 切换密码显示类型
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        eyeOpen.classList.add('hidden');
+                        eyeClosed.classList.remove('hidden');
+                    } else {
+                        passwordInput.type = 'password';
+                        eyeOpen.classList.remove('hidden');
+                        eyeClosed.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // 页面加载时自动执行
+            // 加载保存的模板
+            loadSavedTemplates();
+            // 加载自定义CSS
+            loadSavedCss();
+        });
+    </script>
+</body>
+</html>
