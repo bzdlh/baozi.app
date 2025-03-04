@@ -2,7 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#5D5CDE">
+    <!-- 添加主屏幕图标 -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiM1RDVDREU2MCIgc3Ryb2tlPSIjNUQ1Q0RFIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI5Ii8+PHRleHQgeD0iMTAiIHk9IjE1IiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNUQ1Q0RFIj7wn5O6PC90ZXh0Pjwvc3ZnPg==">
+    <link rel="shortcut icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiM1RDVDREU2MCIgc3Ryb2tlPSIjNUQ1Q0RFIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI5Ii8+PHRleHQgeD0iMTAiIHk9IjE1IiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNUQ1Q0RFIj7wn5O6PC90ZXh0Pjwvc3ZnPg==">
     <title>代运营神器-包子</title>
     <script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,6 +29,26 @@
         /* Custom variables */
         :root {
             --primary: #5D5CDE;
+            touch-action: manipulation;
+        }
+        
+        /* 增强手机端点击体验 */
+        button, select, input, textarea, .clickable {
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        
+        /* 增大移动端按钮尺寸 */
+        @media (max-width: 640px) {
+            button, select, input[type="submit"] {
+                min-height: 44px;
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+            
+            input, textarea {
+                font-size: 16px !important; /* 防止iOS缩放 */
+            }
         }
         
         .dark .preview-content {
@@ -445,9 +472,118 @@
             <p class="text-xs mt-1 text-gray-500 dark:text-gray-500">© 2025 代运营神器-包子</p>
         </footer>
     </div>
+    
+    <!-- 添加到主屏幕提示 -->
+    <div id="add-to-home-tip" class="hidden fixed bottom-0 left-0 right-0 bg-primary text-white p-4 text-center z-50">
+        <p>💡 添加到主屏幕，下次使用更方便！</p>
+        <div class="mt-2 flex justify-center gap-2">
+            <button onclick="document.getElementById('add-to-home-tip').classList.add('hidden')" class="px-3 py-1 bg-white text-primary rounded">
+                稍后再说
+            </button>
+            <button onclick="showHomeScreenInstructions()" class="px-3 py-1 bg-white text-primary rounded">
+                查看方法
+            </button>
+        </div>
+    </div>
 
     <script>
+        // 检测移动设备并显示添加到主屏幕提示
+        function checkMobileAndShowTip() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            let hasSeenTip = false;
+            
+            try {
+                hasSeenTip = localStorage.getItem('seenHomeScreenTip') === 'true';
+            } catch (error) {
+                console.log('无法访问localStorage');
+            }
+            
+            if (isMobile && !hasSeenTip) {
+                setTimeout(() => {
+                    const tipElement = document.getElementById('add-to-home-tip');
+                    if (tipElement) {
+                        tipElement.classList.remove('hidden');
+                        try {
+                            localStorage.setItem('seenHomeScreenTip', 'true');
+                        } catch (error) {
+                            console.log('无法写入localStorage');
+                        }
+                    }
+                }, 3000);
+            }
+        }
+        
+        // 显示添加到主屏幕的具体说明
+        function showHomeScreenInstructions() {
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            
+            let instructions = '';
+            if (isIOS) {
+                instructions = `
+                    1. 点击浏览器底部的"分享"按钮 (方框加箭头图标)
+                    2. 在弹出的选项中找到并点击"添加到主屏幕"
+                    3. 点击右上角的"添加"完成
+                `;
+            } else if (isAndroid) {
+                instructions = `
+                    1. 点击浏览器右上角的"菜单"按钮 (三个点)
+                    2. 在弹出的菜单中找到并点击"添加到主屏幕"
+                    3. 根据提示完成添加
+                `;
+            } else {
+                instructions = `
+                    请在您的浏览器菜单中查找"添加到主屏幕"或类似选项
+                `;
+            }
+            
+            alert(`如何添加到主屏幕:\n\n${instructions.replace(/<br>/g, '\n').replace(/\s{2,}/g, ' ').trim()}`);
+        }
+        
+        // 启用移动端适配的文件处理
+        function enableMobileFileHandling() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // 增强文件输入控件的样式和触摸反馈
+                const fileInputs = document.querySelectorAll('input[type="file"]');
+                fileInputs.forEach(input => {
+                    // 确保文件输入有足够大的触摸区域
+                    const parentButton = input.previousElementSibling;
+                    if (parentButton && parentButton.tagName === 'BUTTON') {
+                        parentButton.addEventListener('touchstart', function() {
+                            this.classList.add('bg-opacity-80');
+                        });
+                        parentButton.addEventListener('touchend', function() {
+                            this.classList.remove('bg-opacity-80');
+                        });
+                    }
+                });
+                
+                // 为导入/导出按钮添加触摸反馈
+                const actionButtons = document.querySelectorAll('button[id$="-btn"]');
+                actionButtons.forEach(button => {
+                    button.addEventListener('touchstart', function() {
+                        this.classList.add('bg-opacity-80');
+                    });
+                    button.addEventListener('touchend', function() {
+                        this.classList.remove('bg-opacity-80');
+                    });
+                });
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', () => {
+            // 添加移动设备检测和优化
+            checkMobileAndShowTip();
+            enableMobileFileHandling();
+            
+            // 设置记住用户卡密默认勾选 - 手机端更方便
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                const rememberUser = document.getElementById('remember-user');
+                if (rememberUser) rememberUser.checked = true;
+            }
             // 登录系统相关元素
             const loginContainer = document.getElementById('login-container');
             const adminPanel = document.getElementById('admin-panel');
@@ -490,31 +626,31 @@
             // 卡密信息存储
             let cardKeys = [];
             
-            // 生成设备指纹，用于标识不同的设备
+            // 生成设备指纹，用于标识不同的设备（改进版，更简单的指纹以适应不同浏览器环境）
             function generateDeviceFingerprint() {
-                const userAgent = navigator.userAgent;
-                const language = navigator.language;
-                const platform = navigator.platform;
-                const screenWidth = window.screen.width;
-                const screenHeight = window.screen.height;
-                const colorDepth = window.screen.colorDepth;
-                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                // 组合这些信息生成一个较为唯一的指纹
-                const rawFingerprint = `${userAgent}|${language}|${platform}|${screenWidth}x${screenHeight}|${colorDepth}|${timezone}`;
+                // 收集更少、更稳定的设备信息以提高兼容性
+                const platform = navigator.platform || '';
+                const screenInfo = `${window.screen.width}x${window.screen.height}`;
+                const language = navigator.language || '';
                 
-                // 使用简单的哈希函数将原始指纹转换为固定长度的字符串
+                // 仅使用基础信息创建指纹
+                const rawFingerprint = `${platform}|${screenInfo}|${language}`;
+                
+                // 使用简单的哈希函数
                 function simpleHash(str) {
                     let hash = 0;
-                    if (str.length === 0) return hash;
                     for (let i = 0; i < str.length; i++) {
                         const char = str.charCodeAt(i);
                         hash = ((hash << 5) - hash) + char;
-                        hash = hash & hash; // Convert to 32bit integer
+                        hash = hash & hash;
                     }
-                    return Math.abs(hash).toString(16); // 转为16进制字符串
+                    return Math.abs(hash).toString(16).substring(0, 8); // 缩短为8字符
                 }
                 
-                return simpleHash(rawFingerprint);
+                const fingerprint = simpleHash(rawFingerprint);
+                console.log('设备信息:', rawFingerprint);
+                console.log('生成的设备指纹:', fingerprint);
+                return fingerprint;
             }
             
             // 获取当前设备的指纹
@@ -629,19 +765,46 @@
                 console.log('当前设备指纹:', currentDeviceFingerprint);
                 
                 // 验证卡密 - 使用不区分大小写的比较
+                // 1. 首先检查是否有可用的有效卡密 
                 const validKey = cardKeys.find(k => 
                     k.key.toUpperCase() === key.toUpperCase() && 
                     k.status === '有效' && 
                     new Date(k.expiryDate) > new Date()
                 );
                 
-                // 检查是否是已使用的卡密，但在当前设备上使用过（允许同一设备重复使用）
+                // 2. 检查是否是一个已经绑定到当前设备的卡密
                 const usedKeyOnThisDevice = cardKeys.find(k => 
                     k.key.toUpperCase() === key.toUpperCase() && 
                     k.status === '已使用' &&
                     k.deviceId === currentDeviceFingerprint &&
                     new Date(k.expiryDate) > new Date()
                 );
+                
+                // 3. 检查是否是一个已经绑定到其他设备的卡密（做详细错误提示用）
+                const usedKeyOnOtherDevice = cardKeys.find(k => 
+                    k.key.toUpperCase() === key.toUpperCase() && 
+                    k.status === '已使用' &&
+                    k.deviceId && 
+                    k.deviceId !== currentDeviceFingerprint &&
+                    new Date(k.expiryDate) > new Date()
+                );
+                
+                // 调试信息
+                console.log('验证卡密结果:', {
+                    validKey: validKey ? '找到有效卡密' : '未找到有效卡密',
+                    usedKeyOnThisDevice: usedKeyOnThisDevice ? '找到本设备已使用的卡密' : '未找到本设备已使用的卡密',
+                    usedKeyOnOtherDevice: usedKeyOnOtherDevice ? '卡密已在其他设备上使用' : '无其他设备使用此卡密',
+                    currentFingerprint: currentDeviceFingerprint
+                });
+                
+                // 如果找到在其他设备上使用的卡密，显示详细日志
+                if (usedKeyOnOtherDevice) {
+                    console.log('卡密被其他设备使用:', {
+                        key: usedKeyOnOtherDevice.key,
+                        deviceId: usedKeyOnOtherDevice.deviceId,
+                        currentDevice: currentDeviceFingerprint
+                    });
+                }
                 
                 if (validKey || usedKeyOnThisDevice) {
                     isLoggedIn = true;
@@ -652,6 +815,9 @@
                         validKey.status = '已使用';
                         validKey.deviceId = currentDeviceFingerprint;
                     }
+                    
+                    // 确保设备ID保存在卡密数据中（包括通过导出分享给他人的卡密）
+                    console.log('卡密已绑定到设备:', currentDeviceFingerprint);
                     
                     // 如果选择了记住卡密
                     if (rememberUser.checked) {
@@ -690,13 +856,40 @@
                     if (existingKey) {
                         if (existingKey.status === '已使用') {
                             if (existingKey.deviceId && existingKey.deviceId !== currentDeviceFingerprint) {
+                                // 该卡密已在其他设备上使用
+                                console.log(`卡密 ${key} 已绑定到设备 ${existingKey.deviceId}，当前设备ID: ${currentDeviceFingerprint}`);
                                 alert('该卡密已在其他设备上使用，一个卡密只能在一台设备上使用');
                             } else {
-                                alert('卡密已被使用');
+                                // 卡密已被使用，但没有指定设备ID的情况
+                                console.log('卡密已被使用但无设备ID，视为有效卡密');
+                                
+                                // 这种情况视为有效卡密，将它重新绑定到当前设备
+                                existingKey.deviceId = currentDeviceFingerprint;
+                                
+                                // 登录用户
+                                isLoggedIn = true;
+                                isAdmin = false;
+                                
+                                // 清空卡密输入
+                                cardKey.value = '';
+                                
+                                // 显示应用界面
+                                loginContainer.classList.add('hidden');
+                                appContainer.classList.remove('hidden');
+                                
+                                alert(`登录成功！欢迎使用代运营神器-包子`);
+                                
+                                // 更新卡密表
+                                if (adminPanel.classList.contains('hidden') === false) {
+                                    updateCardKeysTable();
+                                }
+                                return; // 提前返回
                             }
                         } else if (new Date(existingKey.expiryDate) <= new Date()) {
                             alert('卡密已过期');
                         } else {
+                            // 其他情况，可能是状态异常
+                            console.log('卡密验证失败:', existingKey);
                             alert('卡密验证失败，请联系管理员');
                         }
                     } else {
@@ -818,12 +1011,13 @@
                 expiry.setDate(expiry.getDate() + days);
                 
                 for (let i = 0; i < count; i++) {
-                    // 创建一个卡密对象
+                    // 创建一个卡密对象 - 注意不要绑定设备ID
                     const newKey = {
                         key: generateRandomKey(),
                         createdDate: now.toISOString(),
                         expiryDate: expiry.toISOString(),
                         status: '有效'
+                        // 重要：不要在这里添加deviceId，使卡密可以在任何设备首次使用
                     };
                     
                     // 确保生成的卡密显示在管理界面中
