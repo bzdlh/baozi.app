@@ -243,6 +243,9 @@
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold">卡密列表</h2>
                         <div class="flex gap-2">
+                            <button id="clear-keys-btn" class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg hover:bg-opacity-90 transition-colors text-sm">
+                                清除卡密
+                            </button>
                             <button id="export-keys-btn" class="px-3 py-1 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors text-sm">
                                 导出卡密
                             </button>
@@ -1003,6 +1006,59 @@
                 });
             }
             
+            // 清除卡密按钮事件
+            const clearKeysBtn = document.getElementById('clear-keys-btn');
+            clearKeysBtn.addEventListener('click', () => {
+                if (cardKeys.length === 0) {
+                    alert('没有卡密可清除');
+                    return;
+                }
+                
+                if (confirm('确定要清除所有卡密吗？此操作不可恢复！')) {
+                    // 提供选择性清除功能
+                    const options = ['清除所有卡密', '只清除已过期卡密', '只清除已使用卡密', '取消操作'];
+                    
+                    let message = '请选择清除方式：\n';
+                    options.forEach((option, index) => {
+                        message += `${index + 1}. ${option}\n`;
+                    });
+                    
+                    const userChoice = prompt(message, '1');
+                    if (!userChoice) return;
+                    
+                    const choice = parseInt(userChoice);
+                    if (isNaN(choice) || choice < 1 || choice > options.length) {
+                        alert('无效的选择');
+                        return;
+                    }
+                    
+                    // 根据用户选择执行不同的清除操作
+                    if (choice === 1) {
+                        // 清除所有卡密
+                        const count = cardKeys.length;
+                        cardKeys = [];
+                        alert(`已清除所有${count}个卡密`);
+                    } else if (choice === 2) {
+                        // 只清除已过期卡密
+                        const now = new Date();
+                        const expiredCount = cardKeys.filter(k => new Date(k.expiryDate) <= now).length;
+                        cardKeys = cardKeys.filter(k => new Date(k.expiryDate) > now);
+                        alert(`已清除${expiredCount}个已过期卡密`);
+                    } else if (choice === 3) {
+                        // 只清除已使用卡密
+                        const usedCount = cardKeys.filter(k => k.status === '已使用').length;
+                        cardKeys = cardKeys.filter(k => k.status !== '已使用');
+                        alert(`已清除${usedCount}个已使用卡密`);
+                    } else {
+                        // 取消操作
+                        return;
+                    }
+                    
+                    // 更新表格
+                    updateCardKeysTable();
+                }
+            });
+            
             // 生成随机卡密函数
             function generateKeys(count, days) {
                 const keys = [];
@@ -1010,10 +1066,22 @@
                 const expiry = new Date(now);
                 expiry.setDate(expiry.getDate() + days);
                 
+                // 获取现有卡密的集合，用于去重
+                const existingKeySet = new Set(cardKeys.map(k => k.key.toUpperCase()));
+                
                 for (let i = 0; i < count; i++) {
+                    // 生成一个不重复的卡密
+                    let newKeyValue;
+                    do {
+                        newKeyValue = generateRandomKey();
+                    } while (existingKeySet.has(newKeyValue.toUpperCase()));
+                    
+                    // 将新卡密添加到集合中，确保后续生成的也不会重复
+                    existingKeySet.add(newKeyValue.toUpperCase());
+                    
                     // 创建一个卡密对象 - 注意不要绑定设备ID
                     const newKey = {
-                        key: generateRandomKey(),
+                        key: newKeyValue,
                         createdDate: now.toISOString(),
                         expiryDate: expiry.toISOString(),
                         status: '有效'
