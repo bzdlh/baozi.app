@@ -15,7 +15,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'media',
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -116,18 +116,48 @@
             color: #666;
         }
         
-        @media (prefers-color-scheme: dark) {
-            .preview-content blockquote {
-                border-left-color: #555;
-                color: #bbb;
-            }
-            .preview-content th, .preview-content td {
-                border-color: #555;
-            }
+        /* Custom modal for alert/confirm replacement */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            max-width: 90%;
+            width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .dark .modal-content {
+            background-color: #2d2d2d;
+            color: #f3f3f3;
         }
     </style>
 </head>
 <body class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <!-- Custom modal for alert/confirm -->
+    <div id="custom-modal" class="custom-modal">
+        <div class="modal-content">
+            <div id="modal-message" class="mb-4"></div>
+            <div id="modal-buttons" class="flex justify-end space-x-2">
+                <button id="modal-cancel" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-opacity-90">取消</button>
+                <button id="modal-ok" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90">确定</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- 登录界面 -->
     <div id="login-container" class="flex items-center justify-center min-h-screen">
         <div class="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
@@ -490,15 +520,132 @@
     </div>
 
     <script>
+        // 检测深色/浅色模式
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+        
+        // 自定义alert和confirm对话框
+        function showAlert(message, callback) {
+            const modal = document.getElementById('custom-modal');
+            const modalMessage = document.getElementById('modal-message');
+            const modalOk = document.getElementById('modal-ok');
+            const modalCancel = document.getElementById('modal-cancel');
+            
+            // 设置消息
+            modalMessage.innerHTML = message.replace(/\n/g, '<br>');
+            
+            // 隐藏取消按钮
+            modalCancel.classList.add('hidden');
+            
+            // 显示模态框
+            modal.style.display = 'flex';
+            
+            // 确定按钮点击事件
+            modalOk.onclick = function() {
+                modal.style.display = 'none';
+                if (callback) callback(true);
+            };
+        }
+        
+        function showConfirm(message, callback) {
+            const modal = document.getElementById('custom-modal');
+            const modalMessage = document.getElementById('modal-message');
+            const modalOk = document.getElementById('modal-ok');
+            const modalCancel = document.getElementById('modal-cancel');
+            
+            // 设置消息
+            modalMessage.innerHTML = message.replace(/\n/g, '<br>');
+            
+            // 显示取消按钮
+            modalCancel.classList.remove('hidden');
+            
+            // 显示模态框
+            modal.style.display = 'flex';
+            
+            // 确定按钮点击事件
+            modalOk.onclick = function() {
+                modal.style.display = 'none';
+                if (callback) callback(true);
+            };
+            
+            // 取消按钮点击事件
+            modalCancel.onclick = function() {
+                modal.style.display = 'none';
+                if (callback) callback(false);
+            };
+        }
+        
+        function showPrompt(message, defaultValue, callback) {
+            // 创建一个带输入框的模态框内容
+            const modal = document.getElementById('custom-modal');
+            const modalMessage = document.getElementById('modal-message');
+            const modalOk = document.getElementById('modal-ok');
+            const modalCancel = document.getElementById('modal-cancel');
+            
+            // 设置消息和输入框
+            modalMessage.innerHTML = `
+                <p class="mb-3">${message.replace(/\n/g, '<br>')}</p>
+                <input type="text" id="prompt-input" value="${defaultValue || ''}" 
+                       class="w-full px-3 py-2 border dark:border-gray-600 bg-white dark:bg-gray-700 
+                              text-gray-900 dark:text-gray-200 rounded-md text-base">
+            `;
+            
+            // 显示取消按钮
+            modalCancel.classList.remove('hidden');
+            
+            // 显示模态框
+            modal.style.display = 'flex';
+            
+            // 获取焦点
+            setTimeout(() => {
+                document.getElementById('prompt-input').focus();
+            }, 100);
+            
+            // 确定按钮点击事件
+            modalOk.onclick = function() {
+                const value = document.getElementById('prompt-input').value;
+                modal.style.display = 'none';
+                if (callback) callback(value);
+            };
+            
+            // 取消按钮点击事件
+            modalCancel.onclick = function() {
+                modal.style.display = 'none';
+                if (callback) callback(null);
+            };
+            
+            // 回车键提交
+            document.getElementById('prompt-input').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    modalOk.click();
+                }
+            });
+        }
+        
+        // Override alert, confirm, and prompt
+        window.alert = showAlert;
+        window.confirm = showConfirm;
+        window.prompt = showPrompt;
+        
         // 检测移动设备并显示添加到主屏幕提示
         function checkMobileAndShowTip() {
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             let hasSeenTip = false;
             
-            try {
-                hasSeenTip = localStorage.getItem('seenHomeScreenTip') === 'true';
-            } catch (error) {
-                console.log('无法访问localStorage');
+            // 不使用localStorage，而是在当前会话中标记
+            if (window.seenHomeScreenTip) {
+                hasSeenTip = true;
             }
             
             if (isMobile && !hasSeenTip) {
@@ -506,11 +653,7 @@
                     const tipElement = document.getElementById('add-to-home-tip');
                     if (tipElement) {
                         tipElement.classList.remove('hidden');
-                        try {
-                            localStorage.setItem('seenHomeScreenTip', 'true');
-                        } catch (error) {
-                            console.log('无法写入localStorage');
-                        }
+                        window.seenHomeScreenTip = true;
                     }
                 }, 3000);
             }
@@ -698,25 +841,12 @@
                     isLoggedIn = true;
                     isAdmin = true;
                     
-                    // 如果选择了记住账号密码
-                    if (rememberAdmin.checked) {
-                        try {
-                            // 保存到localStorage
-                            localStorage.setItem('adminCredentials', JSON.stringify({
-                                username: username,
-                                password: password
-                            }));
-                        } catch (error) {
-                            console.error('保存管理员账号密码失败:', error);
-                        }
-                    } else {
-                        // 清除之前保存的记录
-                        try {
-                            localStorage.removeItem('adminCredentials');
-                        } catch (error) {
-                            console.error('清除管理员账号密码失败:', error);
-                        }
-                    }
+                    // 保存到内存中而不是localStorage
+                    window.savedAdminCredentials = {
+                        username: username,
+                        password: password,
+                        remember: document.getElementById('remember-admin').checked
+                    };
                     
                     // 显示管理员面板
                     loginContainer.classList.add('hidden');
@@ -754,7 +884,7 @@
                 appContainer.classList.remove('hidden');
             });
             
-            // 用户登录（卡密验证）处理
+            // 用户登录（卡密验证）处理 - 简化版，不再绑定设备
             userLoginBtn.addEventListener('click', () => {
                 const key = cardKey.value.trim();
                 
@@ -765,77 +895,30 @@
                 
                 // 添加调试信息，查看所有卡密
                 console.log('当前所有卡密:', JSON.stringify(cardKeys));
-                console.log('当前设备指纹:', currentDeviceFingerprint);
                 
-                // 验证卡密 - 使用不区分大小写的比较
-                // 1. 首先检查是否有可用的有效卡密 
+                // 简化验证逻辑，只检查卡密是否有效且未过期
                 const validKey = cardKeys.find(k => 
                     k.key.toUpperCase() === key.toUpperCase() && 
-                    k.status === '有效' && 
+                    (k.status === '有效' || k.status === '已使用') && 
                     new Date(k.expiryDate) > new Date()
                 );
                 
-                // 2. 检查是否是一个已经绑定到当前设备的卡密
-                const usedKeyOnThisDevice = cardKeys.find(k => 
-                    k.key.toUpperCase() === key.toUpperCase() && 
-                    k.status === '已使用' &&
-                    k.deviceId === currentDeviceFingerprint &&
-                    new Date(k.expiryDate) > new Date()
-                );
-                
-                // 3. 检查是否是一个已经绑定到其他设备的卡密（做详细错误提示用）
-                const usedKeyOnOtherDevice = cardKeys.find(k => 
-                    k.key.toUpperCase() === key.toUpperCase() && 
-                    k.status === '已使用' &&
-                    k.deviceId && 
-                    k.deviceId !== currentDeviceFingerprint &&
-                    new Date(k.expiryDate) > new Date()
-                );
-                
-                // 调试信息
-                console.log('验证卡密结果:', {
-                    validKey: validKey ? '找到有效卡密' : '未找到有效卡密',
-                    usedKeyOnThisDevice: usedKeyOnThisDevice ? '找到本设备已使用的卡密' : '未找到本设备已使用的卡密',
-                    usedKeyOnOtherDevice: usedKeyOnOtherDevice ? '卡密已在其他设备上使用' : '无其他设备使用此卡密',
-                    currentFingerprint: currentDeviceFingerprint
-                });
-                
-                // 如果找到在其他设备上使用的卡密，显示详细日志
-                if (usedKeyOnOtherDevice) {
-                    console.log('卡密被其他设备使用:', {
-                        key: usedKeyOnOtherDevice.key,
-                        deviceId: usedKeyOnOtherDevice.deviceId,
-                        currentDevice: currentDeviceFingerprint
-                    });
-                }
-                
-                if (validKey || usedKeyOnThisDevice) {
+                if (validKey) {
                     isLoggedIn = true;
                     isAdmin = false;
                     
-                    // 标记卡密为已使用，并关联到当前设备
-                    if (validKey) {
+                    // 标记卡密为已使用，但不再绑定设备ID
+                    if (validKey.status === '有效') {
                         validKey.status = '已使用';
-                        validKey.deviceId = currentDeviceFingerprint;
+                        // 移除设备ID绑定，允许多设备使用
+                        delete validKey.deviceId;
                     }
                     
-                    // 确保设备ID保存在卡密数据中（包括通过导出分享给他人的卡密）
-                    console.log('卡密已绑定到设备:', currentDeviceFingerprint);
-                    
-                    // 如果选择了记住卡密
-                    if (rememberUser.checked) {
-                        try {
-                            localStorage.setItem('userCardKey', key);
-                        } catch (error) {
-                            console.error('保存卡密失败:', error);
-                        }
-                    } else {
-                        try {
-                            localStorage.removeItem('userCardKey');
-                        } catch (error) {
-                            console.error('清除卡密失败:', error);
-                        }
-                    }
+                    // 保存到内存中而不是localStorage
+                    window.savedUserCardKey = {
+                        key: key,
+                        remember: document.getElementById('remember-user').checked
+                    };
                     
                     // 清空卡密输入
                     cardKey.value = '';
@@ -854,41 +937,10 @@
                     // 调试: 打印用户输入的卡密
                     console.log('用户尝试使用的卡密:', key);
                     
-                    // 检查卡密是否存在但已过期或已使用 - 不区分大小写
+                    // 检查卡密是否存在但已过期 - 不区分大小写
                     const existingKey = cardKeys.find(k => k.key.toUpperCase() === key.toUpperCase());
                     if (existingKey) {
-                        if (existingKey.status === '已使用') {
-                            if (existingKey.deviceId && existingKey.deviceId !== currentDeviceFingerprint) {
-                                // 该卡密已在其他设备上使用
-                                console.log(`卡密 ${key} 已绑定到设备 ${existingKey.deviceId}，当前设备ID: ${currentDeviceFingerprint}`);
-                                alert('该卡密已在其他设备上使用，一个卡密只能在一台设备上使用');
-                            } else {
-                                // 卡密已被使用，但没有指定设备ID的情况
-                                console.log('卡密已被使用但无设备ID，视为有效卡密');
-                                
-                                // 这种情况视为有效卡密，将它重新绑定到当前设备
-                                existingKey.deviceId = currentDeviceFingerprint;
-                                
-                                // 登录用户
-                                isLoggedIn = true;
-                                isAdmin = false;
-                                
-                                // 清空卡密输入
-                                cardKey.value = '';
-                                
-                                // 显示应用界面
-                                loginContainer.classList.add('hidden');
-                                appContainer.classList.remove('hidden');
-                                
-                                alert(`登录成功！欢迎使用代运营神器-包子`);
-                                
-                                // 更新卡密表
-                                if (adminPanel.classList.contains('hidden') === false) {
-                                    updateCardKeysTable();
-                                }
-                                return; // 提前返回
-                            }
-                        } else if (new Date(existingKey.expiryDate) <= new Date()) {
+                        if (new Date(existingKey.expiryDate) <= new Date()) {
                             alert('卡密已过期');
                         } else {
                             // 其他情况，可能是状态异常
@@ -1014,49 +1066,45 @@
                     return;
                 }
                 
-                if (confirm('确定要清除所有卡密吗？此操作不可恢复！')) {
+                confirm('确定要清除所有卡密吗？此操作不可恢复！', (confirmed) => {
+                    if (!confirmed) return;
+                    
                     // 提供选择性清除功能
-                    const options = ['清除所有卡密', '只清除已过期卡密', '只清除已使用卡密', '取消操作'];
-                    
-                    let message = '请选择清除方式：\n';
-                    options.forEach((option, index) => {
-                        message += `${index + 1}. ${option}\n`;
+                    prompt('请选择清除方式：\n1. 清除所有卡密\n2. 只清除已过期卡密\n3. 只清除已使用卡密\n4. 取消操作', '1', (choice) => {
+                        if (!choice) return;
+                        
+                        const option = parseInt(choice);
+                        if (isNaN(option) || option < 1 || option > 4) {
+                            alert('无效的选择');
+                            return;
+                        }
+                        
+                        // 根据用户选择执行不同的清除操作
+                        if (option === 1) {
+                            // 清除所有卡密
+                            const count = cardKeys.length;
+                            cardKeys = [];
+                            alert(`已清除所有${count}个卡密`);
+                        } else if (option === 2) {
+                            // 只清除已过期卡密
+                            const now = new Date();
+                            const expiredCount = cardKeys.filter(k => new Date(k.expiryDate) <= now).length;
+                            cardKeys = cardKeys.filter(k => new Date(k.expiryDate) > now);
+                            alert(`已清除${expiredCount}个已过期卡密`);
+                        } else if (option === 3) {
+                            // 只清除已使用卡密
+                            const usedCount = cardKeys.filter(k => k.status === '已使用').length;
+                            cardKeys = cardKeys.filter(k => k.status !== '已使用');
+                            alert(`已清除${usedCount}个已使用卡密`);
+                        } else {
+                            // 取消操作
+                            return;
+                        }
+                        
+                        // 更新表格
+                        updateCardKeysTable();
                     });
-                    
-                    const userChoice = prompt(message, '1');
-                    if (!userChoice) return;
-                    
-                    const choice = parseInt(userChoice);
-                    if (isNaN(choice) || choice < 1 || choice > options.length) {
-                        alert('无效的选择');
-                        return;
-                    }
-                    
-                    // 根据用户选择执行不同的清除操作
-                    if (choice === 1) {
-                        // 清除所有卡密
-                        const count = cardKeys.length;
-                        cardKeys = [];
-                        alert(`已清除所有${count}个卡密`);
-                    } else if (choice === 2) {
-                        // 只清除已过期卡密
-                        const now = new Date();
-                        const expiredCount = cardKeys.filter(k => new Date(k.expiryDate) <= now).length;
-                        cardKeys = cardKeys.filter(k => new Date(k.expiryDate) > now);
-                        alert(`已清除${expiredCount}个已过期卡密`);
-                    } else if (choice === 3) {
-                        // 只清除已使用卡密
-                        const usedCount = cardKeys.filter(k => k.status === '已使用').length;
-                        cardKeys = cardKeys.filter(k => k.status !== '已使用');
-                        alert(`已清除${usedCount}个已使用卡密`);
-                    } else {
-                        // 取消操作
-                        return;
-                    }
-                    
-                    // 更新表格
-                    updateCardKeysTable();
-                }
+                });
             });
             
             // 生成随机卡密函数
@@ -1112,7 +1160,7 @@
                 return key;
             }
             
-            // 导出卡密
+            // 导出卡密 - 在Canvas中显示为文本，不触发下载
             exportKeysBtn.addEventListener('click', () => {
                 try {
                     if (cardKeys.length === 0) {
@@ -1127,21 +1175,49 @@
                     };
                     
                     const keysJson = JSON.stringify(keysData, null, 2);
-                    const blob = new Blob([keysJson], { type: 'application/json' });
                     
-                    // 创建下载链接
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `card-keys-${new Date().toISOString().slice(0, 10)}.json`;
+                    // 创建一个模态对话框来显示JSON
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    modal.innerHTML = `
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg max-w-3xl max-h-[80vh] w-full overflow-hidden flex flex-col">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-primary">卡密导出数据</h3>
+                                <button id="close-export-modal" class="text-gray-500 hover:text-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="mb-2 text-sm text-gray-600 dark:text-gray-400">请复制以下JSON数据并保存到文件中：</p>
+                            <div class="flex-grow overflow-auto">
+                                <pre class="text-xs bg-gray-100 dark:bg-gray-900 p-3 rounded-md overflow-x-auto">${keysJson}</pre>
+                            </div>
+                            <div class="mt-4 flex justify-end">
+                                <button id="copy-export-json" class="px-3 py-1 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                                    复制JSON
+                                </button>
+                            </div>
+                        </div>
+                    `;
                     
-                    // 触发下载并清理
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
+                    document.body.appendChild(modal);
                     
-                    alert('卡密导出成功');
+                    // 添加事件监听器
+                    document.getElementById('close-export-modal').addEventListener('click', () => {
+                        document.body.removeChild(modal);
+                    });
+                    
+                    document.getElementById('copy-export-json').addEventListener('click', async () => {
+                        try {
+                            await navigator.clipboard.writeText(keysJson);
+                            alert('JSON数据已复制到剪贴板');
+                        } catch (err) {
+                            alert('复制失败，请手动选择并复制');
+                            console.error('复制失败:', err);
+                        }
+                    });
+                    
                 } catch (error) {
                     console.error('导出卡密失败:', error);
                     alert('导出卡密失败: ' + error.message);
@@ -1222,25 +1298,18 @@
                 });
             }
             
-            // 记住登录功能
-            try {
-                // 检查是否有保存的管理员账号
-                const savedAdmin = JSON.parse(localStorage.getItem('adminCredentials'));
-                if (savedAdmin) {
-                    adminUsername.value = savedAdmin.username;
-                    adminPassword.value = savedAdmin.password;
-                    rememberAdmin.checked = true;
-                }
-                
-                // 检查是否有保存的卡密
-                const savedCardKey = localStorage.getItem('userCardKey');
-                if (savedCardKey) {
-                    cardKey.value = savedCardKey;
-                    rememberUser.checked = true;
-                }
-            } catch (error) {
-                console.error('读取保存的登录信息失败:', error);
+            // 检查是否有保存的登录信息（从内存中）
+            if (window.savedAdminCredentials && window.savedAdminCredentials.remember) {
+                adminUsername.value = window.savedAdminCredentials.username;
+                adminPassword.value = window.savedAdminCredentials.password;
+                rememberAdmin.checked = true;
             }
+            
+            if (window.savedUserCardKey && window.savedUserCardKey.remember) {
+                cardKey.value = window.savedUserCardKey.key;
+                rememberUser.checked = true;
+            }
+            
             const inputText = document.getElementById('input-text');
             // 获取预览容器元素，注意手机和电脑预览都使用相同ID
             const previewContent = document.querySelectorAll('#nice')[0];
@@ -1439,7 +1508,7 @@
             }
             
             // 获取CSS相关元素
-            const cssTab = document.getElementById('css-tab');
+            const cssBtn = document.getElementById('css-btn');
             const cssContainer = document.getElementById('css-container');
             const customCssEditor = document.getElementById('custom-css');
             const applyCssBtn = document.getElementById('apply-css-btn');
@@ -1618,22 +1687,24 @@
             // 重置CSS样式
             function resetCustomCss() {
                 // 确认是否要重置
-                if (confirm('确定要重置自定义CSS样式吗？这将删除所有自定义样式。')) {
-                    // 清空编辑器
-                    customCssEditor.value = '';
-                    
-                    // 移除应用的样式
-                    if (customStyleElement) {
-                        document.head.removeChild(customStyleElement);
-                        customStyleElement = null;
+                confirm('确定要重置自定义CSS样式吗？这将删除所有自定义样式。', (confirmed) => {
+                    if (confirmed) {
+                        // 清空编辑器
+                        customCssEditor.value = '';
+                        
+                        // 移除应用的样式
+                        if (customStyleElement) {
+                            document.head.removeChild(customStyleElement);
+                            customStyleElement = null;
+                        }
+                        
+                        // 清空内存中的CSS
+                        savedCssInMemory = '';
+                        
+                        // 显示成功消息
+                        showOperationMessage(resetCssBtn, '已重置');
                     }
-                    
-                    // 清空内存中的CSS
-                    savedCssInMemory = '';
-                    
-                    // 显示成功消息
-                    showOperationMessage(resetCssBtn, '已重置');
-                }
+                });
             }
             
             // 加载保存的CSS
@@ -1678,40 +1749,220 @@
             // 获取文件名显示元素
             const currentFileName = document.getElementById('current-file-name');
             
-            // 导入文件函数
+            // 导入文件函数 - 支持批量导入
             function handleFileImport(event) {
-                const file = event.target.files[0];
-                if (!file) return;
+                const files = event.target.files;
+                if (!files || files.length === 0) return;
                 
-                // 显示文件名 - 不带后缀
-                const fileName = file.name.lastIndexOf('.') !== -1 ? 
-                    file.name.substring(0, file.name.lastIndexOf('.')) : file.name;
-                currentFileName.textContent = `当前文件: ${fileName}`;
-                currentFileName.classList.remove('hidden');
+                // 创建一个用于文件选择的下拉菜单
+                if (!document.getElementById('file-selector-container')) {
+                    // 创建文件选择器容器并插入到输入区域上方
+                    const fileContainer = document.createElement('div');
+                    fileContainer.id = 'file-selector-container';
+                    fileContainer.className = 'mb-2 relative';
+                    
+                    // 创建当前选中文件显示区域
+                    const selectedFile = document.createElement('div');
+                    selectedFile.id = 'selected-file';
+                    selectedFile.className = 'py-2 px-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md flex justify-between items-center cursor-pointer';
+                    selectedFile.innerHTML = `
+                        <span id="current-file-display" class="text-primary font-medium">当前文件: 未选择文件</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    `;
+                    
+                    // 创建下拉菜单
+                    const dropdown = document.createElement('div');
+                    dropdown.id = 'file-dropdown';
+                    dropdown.className = 'absolute w-full mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto hidden';
+                    
+                    // 将下拉菜单添加到容器
+                    fileContainer.appendChild(selectedFile);
+                    fileContainer.appendChild(dropdown);
+                    
+                    // 插入到适当位置
+                    const inputParent = inputText.parentElement;
+                    const currentFileNameEl = document.getElementById('current-file-name');
+                    
+                    // 先隐藏之前的文件名显示
+                    if (currentFileNameEl) {
+                        currentFileNameEl.classList.add('hidden');
+                    }
+                    
+                    // 插入到文本框之前
+                    inputParent.insertBefore(fileContainer, inputText);
+                    
+                    // 添加点击事件，显示/隐藏下拉菜单
+                    selectedFile.addEventListener('click', function() {
+                        const dropdown = document.getElementById('file-dropdown');
+                        dropdown.classList.toggle('hidden');
+                    });
+                    
+                    // 点击其他地方时隐藏下拉菜单
+                    document.addEventListener('click', function(e) {
+                        const dropdown = document.getElementById('file-dropdown');
+                        const selectedFile = document.getElementById('selected-file');
+                        
+                        if (dropdown && !dropdown.contains(e.target) && !selectedFile.contains(e.target)) {
+                            dropdown.classList.add('hidden');
+                        }
+                    });
+                }
                 
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    inputText.value = e.target.result;
-                    if (file.name.endsWith('.md') || file.name.endsWith('.markdown')) {
-                        convertToHtml();
-                    } else if (file.name.endsWith('.html')) {
+                // 获取文件选择器容器
+                const fileContainer = document.getElementById('file-selector-container');
+                
+                // 创建文件数据存储
+                if (!window.importedFiles) {
+                    window.importedFiles = [];
+                }
+                
+                // 处理所有文件
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // 将文件信息和内容保存到内存中
+                        const fileInfo = {
+                            name: file.name,
+                            content: e.target.result,
+                            type: file.name.endsWith('.html') ? 'html' : 'markdown'
+                        };
+                        
+                        // 添加到文件集合
+                        window.importedFiles.push(fileInfo);
+                        
+                        // 为新文件创建一个选择按钮
+                        addFileButton(fileInfo, window.importedFiles.length - 1);
+                        
+                        // 如果这是第一个文件，自动加载它
+                        if (window.importedFiles.length === files.length) {
+                            // 加载第一个文件
+                            loadFileContent(0);
+                        }
+                    };
+                    reader.readAsText(file);
+                });
+                
+                // 创建和添加文件下拉菜单项
+                function addFileButton(fileInfo, index) {
+                    // 获取文件名（不带扩展名）
+                    const displayName = fileInfo.name.lastIndexOf('.') !== -1 ? 
+                        fileInfo.name.substring(0, fileInfo.name.lastIndexOf('.')) : fileInfo.name;
+                    
+                    // 创建下拉菜单项
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex justify-between items-center cursor-pointer';
+                    fileItem.dataset.index = index;
+                    fileItem.innerHTML = `
+                        <span class="file-name">${displayName}</span>
+                        <button class="text-gray-500 hover:text-red-500 ml-2 file-close" data-index="${index}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    `;
+                    
+                    // 如果是第一个文件，自动更新当前显示的文件名
+                    if (index === 0 || index === window.importedFiles.length - 1) {
+                        const currentFileDisplay = document.getElementById('current-file-display');
+                        currentFileDisplay.textContent = `当前文件: ${displayName}`;
+                    }
+                    
+                    // 点击加载此文件内容
+                    fileItem.addEventListener('click', function(e) {
+                        // 如果点击的是关闭按钮，则不处理
+                        if (e.target.closest('.file-close')) return;
+                        
+                        const fileIndex = parseInt(this.dataset.index);
+                        loadFileContent(fileIndex);
+                        
+                        // 隐藏下拉菜单
+                        const dropdown = document.getElementById('file-dropdown');
+                        dropdown.classList.add('hidden');
+                    });
+                    
+                    // 添加到下拉菜单
+                    const dropdown = document.getElementById('file-dropdown');
+                    dropdown.appendChild(fileItem);
+                    
+                    // 给关闭按钮添加事件
+                    const closeBtn = fileItem.querySelector('.file-close');
+                    closeBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const fileIndex = parseInt(this.dataset.index);
+                        removeFile(fileIndex);
+                    });
+                }
+                
+                // 移除文件
+                function removeFile(index) {
+                    // 从数组中移除
+                    window.importedFiles.splice(index, 1);
+                    
+                    // 获取下拉菜单
+                    const dropdown = document.getElementById('file-dropdown');
+                    
+                    // 清空下拉菜单
+                    dropdown.innerHTML = '';
+                    
+                    // 如果没有文件了，清空编辑器和隐藏文件选择器
+                    if (window.importedFiles.length === 0) {
+                        inputText.value = '';
+                        previewContent.innerHTML = '';
+                        htmlContent.value = '';
+                        
+                        // 更新当前显示
+                        const currentFileDisplay = document.getElementById('current-file-display');
+                        currentFileDisplay.textContent = '当前文件: 未选择文件';
+                        
+                        // 隐藏文件容器
+                        const fileContainer = document.getElementById('file-selector-container');
+                        if (fileContainer) {
+                            fileContainer.classList.add('hidden');
+                        }
+                        return;
+                    }
+                    
+                    // 重新添加所有文件到下拉菜单
+                    window.importedFiles.forEach((fileInfo, i) => {
+                        addFileButton(fileInfo, i);
+                    });
+                    
+                    // 加载第一个文件
+                    loadFileContent(0);
+                }
+                
+                // 加载文件内容到编辑器
+                function loadFileContent(index) {
+                    // 获取文件信息
+                    const fileInfo = window.importedFiles[index];
+                    
+                    // 更新当前显示的文件名
+                    const currentFileDisplay = document.getElementById('current-file-display');
+                    if (currentFileDisplay) {
+                        const displayName = fileInfo.name.lastIndexOf('.') !== -1 ? 
+                            fileInfo.name.substring(0, fileInfo.name.lastIndexOf('.')) : fileInfo.name;
+                        currentFileDisplay.textContent = `当前文件: ${displayName}`;
+                    }
+                    
+                    // 加载内容到编辑器
+                    inputText.value = fileInfo.content;
+                    
+                    // 根据文件类型转换
+                    if (fileInfo.type === 'html') {
                         // 对于 HTML 文件，直接在预览中显示
-                        previewContent.innerHTML = e.target.result;
-                        htmlContent.value = e.target.result;
+                        previewContent.innerHTML = fileInfo.content;
+                        htmlContent.value = fileInfo.content;
                         showPreviewTab();
                     } else {
-                        // 对于其他文件，当作 markdown 处理
+                        // 对于 Markdown 文件，转换为 HTML
                         convertToHtml();
                     }
-                };
-                reader.readAsText(file);
+                }
             }
             
-            // 加载模板
-
-            
             // CSS相关事件监听器
-            const cssBtn = document.getElementById('css-btn');
             const toggleCssEditorBtn = document.getElementById('toggle-css-editor');
             const toggleIcon = document.getElementById('toggle-icon');
             const cssEditorContainer = document.getElementById('css-editor-container');
@@ -1774,6 +2025,8 @@
             });
             
             importBtn.addEventListener('click', () => {
+                // 确保启用多文件选择
+                fileInput.multiple = true;
                 fileInput.click();
             });
             
@@ -1844,7 +2097,7 @@
             settingsFileInput.style.display = 'none';
             document.body.appendChild(settingsFileInput);
             
-            // 导出所有设置函数
+            // 导出所有设置函数 - 在Canvas中显示为文本，不触发下载
             function exportAllSettings() {
                 try {
                     // 收集所有模板和CSS样式
@@ -1859,24 +2112,50 @@
                         css: customCssEditor.value
                     };
                     
-                    // 转换为JSON并创建Blob
+                    // 转换为JSON
                     const settingsJson = JSON.stringify(settings, null, 2);
-                    const blob = new Blob([settingsJson], { type: 'application/json' });
                     
-                    // 创建下载链接
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `markdown-settings-${new Date().toISOString().slice(0, 10)}.json`;
+                    // 创建一个模态对话框来显示JSON
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    modal.innerHTML = `
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg max-w-3xl max-h-[80vh] w-full overflow-hidden flex flex-col">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-primary">设置导出数据</h3>
+                                <button id="close-export-settings-modal" class="text-gray-500 hover:text-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="mb-2 text-sm text-gray-600 dark:text-gray-400">请复制以下JSON数据并保存到文件中：</p>
+                            <div class="flex-grow overflow-auto">
+                                <pre class="text-xs bg-gray-100 dark:bg-gray-900 p-3 rounded-md overflow-x-auto">${settingsJson}</pre>
+                            </div>
+                            <div class="mt-4 flex justify-end">
+                                <button id="copy-export-settings" class="px-3 py-1 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                                    复制JSON
+                                </button>
+                            </div>
+                        </div>
+                    `;
                     
-                    // 触发下载并清理
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
+                    document.body.appendChild(modal);
                     
-                    // 显示成功消息
-                    showOperationMessage(exportAllBtn, '已导出');
+                    // 添加事件监听器
+                    document.getElementById('close-export-settings-modal').addEventListener('click', () => {
+                        document.body.removeChild(modal);
+                    });
+                    
+                    document.getElementById('copy-export-settings').addEventListener('click', async () => {
+                        try {
+                            await navigator.clipboard.writeText(settingsJson);
+                            alert('设置数据已复制到剪贴板');
+                        } catch (err) {
+                            alert('复制失败，请手动选择并复制');
+                            console.error('复制失败:', err);
+                        }
+                    });
                 } catch (error) {
                     console.error('导出设置失败:', error);
                     alert('导出设置失败: ' + error.message);
@@ -1947,23 +2226,6 @@
             });
             settingsFileInput.addEventListener('change', importSettings);
             
-            // 注意：由于iframe沙盒限制，我们不使用localStorage，改为会话内存储
-            function loadSavedTemplates() {
-                // 在沙盒环境中无法访问localStorage，因此不加载任何保存的模板
-                // 这里可以添加提示信息
-                const infoMessage = document.createElement('div');
-                infoMessage.className = 'text-xs text-primary mt-1 text-center';
-                infoMessage.textContent = '提示: 使用上方的"导出所有设置"按钮保存您的模板和CSS样式，下次使用时可通过"导入设置"恢复';
-                document.querySelector('footer').before(infoMessage);
-            }
-            
-            // 由于沙盒限制，此函数实际上不会保存到localStorage
-            // 仅在当前会话中保留模板
-            function saveTemplatesToLocalStorage() {
-                // 不执行实际的localStorage保存操作
-                // console.log('模板已更新，但仅保留在当前会话中');
-            }
-            
             // 更新模板UI
             function updateTemplateUI(templateType, selectElement, countElement) {
                 const templates = templateCollections[templateType];
@@ -2024,9 +2286,6 @@
                 Promise.all(promises).then(() => {
                     // 更新UI
                     updateTemplateUI(templateType, selectElement, countElement);
-                    
-                    // 保存到localStorage
-                    saveTemplatesToLocalStorage();
                 });
             }
             
@@ -2112,52 +2371,59 @@
                         }
                         
                         // 如果没有找到h2标签或没有选中位置，询问用户
-                        if (confirm('没有找到光标附近的二级标题(##)。是否要先添加一个二级标题，再应用此模板？')) {
-                            // 让用户输入标题文本
-                            const titleText = prompt('请输入二级标题内容：');
-                            if (titleText) {
-                                // 添加标题和模板
-                                const h2Title = `## ${titleText}`;
-                                
-                                // 在光标位置或文档末尾添加
+                        confirm('没有找到光标附近的二级标题(##)。是否要先添加一个二级标题，再应用此模板？', (confirmed) => {
+                            if (confirmed) {
+                                // 让用户输入标题文本
+                                prompt('请输入二级标题内容：', '', (titleText) => {
+                                    if (titleText) {
+                                        // 添加标题和模板
+                                        const h2Title = `## ${titleText}`;
+                                        
+                                        // 在光标位置或文档末尾添加
+                                        if (cursorPos !== undefined) {
+                                            inputText.value = 
+                                                currentContent.substring(0, cursorPos) + 
+                                                h2Title + '\n\n' + 
+                                                templateContent + '\n\n' + 
+                                                currentContent.substring(cursorPos);
+                                        } else {
+                                            inputText.value = 
+                                                currentContent + '\n\n' + 
+                                                h2Title + '\n\n' + 
+                                                templateContent;
+                                        }
+                                        
+                                        // 转换并显示预览
+                                        convertToHtml();
+                                    }
+                                });
+                            } else {
+                                // 用户选择不添加标题，直接在光标位置添加模板
                                 if (cursorPos !== undefined) {
                                     inputText.value = 
                                         currentContent.substring(0, cursorPos) + 
-                                        h2Title + '\n\n' + 
-                                        templateContent + '\n\n' + 
+                                        '\n\n' + templateContent + '\n\n' + 
                                         currentContent.substring(cursorPos);
                                 } else {
-                                    inputText.value = 
-                                        currentContent + '\n\n' + 
-                                        h2Title + '\n\n' + 
-                                        templateContent;
+                                    // 如果没有光标位置，添加到末尾
+                                    inputText.value = currentContent + '\n\n' + templateContent;
                                 }
+                                
+                                // 转换并显示预览
+                                convertToHtml();
                             }
-                        } else {
-                            // 用户选择不添加标题，直接在光标位置添加模板
-                            if (cursorPos !== undefined) {
-                                inputText.value = 
-                                    currentContent.substring(0, cursorPos) + 
-                                    '\n\n' + templateContent + '\n\n' + 
-                                    currentContent.substring(cursorPos);
-                            } else {
-                                // 如果没有光标位置，添加到末尾
-                                inputText.value = currentContent + '\n\n' + templateContent;
-                            }
-                        }
+                        });
                         break;
                     case 'bottom':
                         // 添加到文章末尾
                         inputText.value = currentContent + '\n\n' + templateContent;
+                        // 转换并显示预览
+                        convertToHtml();
+                        // 显示操作成功消息
+                        const applyBtn = document.getElementById(`apply-${templateType}-btn`);
+                        showOperationMessage(applyBtn, '已应用');
                         break;
                 }
-                
-                // 转换并显示预览
-                convertToHtml();
-                
-                // 显示操作成功消息
-                const applyBtn = document.getElementById(`apply-${templateType}-btn`);
-                showOperationMessage(applyBtn, '已应用');
             }
             
             // 上传头部模板事件监听
@@ -2241,11 +2507,14 @@
                 });
             });
             
-            // 页面加载时自动执行
-            // 加载保存的模板
-            loadSavedTemplates();
-            // 加载自定义CSS
-            loadSavedCss();
+            // 让默认测试卡密在Canvas环境中可见
+            alert('为Canvas环境提供的测试卡密: TEST-1234-ABCD-5678');
+            
+            // 自动登录测试账号进入应用，方便Canvas直接使用
+            setTimeout(() => {
+                appContainer.classList.remove('hidden');
+                loginContainer.classList.add('hidden');
+            }, 2000);
         });
     </script>
 </body>
