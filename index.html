@@ -2507,14 +2507,9 @@
                 });
             });
             
-            // 让默认测试卡密在Canvas环境中可见
-            alert('为Canvas环境提供的测试卡密: TEST-1234-ABCD-5678');
-            
-            // 自动登录测试账号进入应用，方便Canvas直接使用
-            setTimeout(() => {
-                appContainer.classList.remove('hidden');
-                loginContainer.classList.add('hidden');
-            }, 2000);
+            // 直接显示应用界面，无需登录
+            appContainer.classList.remove('hidden');
+            loginContainer.classList.add('hidden');
         });
     </script>
 </body>
